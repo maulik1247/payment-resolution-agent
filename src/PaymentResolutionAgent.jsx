@@ -188,6 +188,33 @@ const STYLE = `
     flex-shrink: 0;
     padding: 12px 16px;
     border-bottom: 1px solid #E4E6EB;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .pra-filter-row {
+    display: flex;
+    gap: 6px;
+  }
+  .pra-filter-btn {
+    border: 1px solid #E4E6EB;
+    background: #FFFFFF;
+    color: #5C6370;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .pra-filter-btn-active {
+    background: #1A1D24;
+    border-color: #1A1D24;
+    color: #FFFFFF;
+  }
+  .pra-filter-count {
+    opacity: 0.75;
+    margin-left: 4px;
   }
   .pra-queue-list {
     flex: 1;
@@ -288,6 +315,7 @@ const STYLE = `
   .pra-badge-pending { background: #EEF0F3; color: #6B7280; }
   .pra-badge-processing { background: #FFF4E0; color: #B5790C; }
   .pra-badge-resolved { background: #E6F7ED; color: #1E8A4C; }
+  .pra-badge-done { background: #E6F7ED; color: #1E8A4C; }
   .pra-badge-escalated { background: #FCEDEC; color: #C4392B; }
   .pra-badge-error { background: #FCEDEC; color: #C4392B; }
 
@@ -475,6 +503,175 @@ const STYLE = `
     box-shadow: 0 16px 48px rgba(0,0,0,0.14);
   }
   .pra-modal-actions { display: flex; gap: 8px; }
+
+  .pra-pg {
+    width: 440px;
+    max-width: calc(100vw - 24px);
+    background: #FFFFFF;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 56px rgba(0,0,0,0.18);
+    border: 1px solid #E4E6EB;
+  }
+  .pra-pg-top {
+    background: linear-gradient(135deg, #072654 0%, #0B3A75 55%, #0E4D8C 100%);
+    color: #fff;
+    padding: 18px 20px 16px;
+  }
+  .pra-pg-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .pra-pg-merchant {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.85;
+  }
+  .pra-pg-order {
+    font-size: 11px;
+    opacity: 0.65;
+    margin-top: 3px;
+  }
+  .pra-pg-amount {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-top: 14px;
+  }
+  .pra-pg-amount-sub {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+  .pra-pg-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.14);
+    padding: 5px 8px;
+    border-radius: 6px;
+  }
+  .pra-pg-body { padding: 16px 18px 18px; }
+  .pra-pg-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .pra-pg-tab {
+    border: 1px solid #E4E6EB;
+    background: #FAFBFC;
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #5C6370;
+    cursor: pointer;
+  }
+  .pra-pg-tab-active {
+    background: #EFF6FF;
+    border-color: #93C5FD;
+    color: #1D4ED8;
+  }
+  .pra-pg-apps {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 8px 0 14px;
+  }
+  .pra-pg-app {
+    border: 1px solid #E4E6EB;
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #2A2E36;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .pra-pg-app-active {
+    border-color: #93C5FD;
+    background: #EFF6FF;
+    color: #1D4ED8;
+  }
+  .pra-pg-row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .pra-pg-secure {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #8A8F98;
+    margin-top: 12px;
+  }
+  .pra-pg-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    text-align: left;
+  }
+  .pra-pg-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #8A8F98;
+  }
+  .pra-pg-step-on { color: #1A1D24; font-weight: 600; }
+  .pra-pg-step-done { color: #1E8A4C; }
+  .pra-pg-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #D8DADF;
+    flex-shrink: 0;
+  }
+  .pra-pg-dot-on { background: #3B7DD8; box-shadow: 0 0 0 4px rgba(59,125,216,0.15); }
+  .pra-pg-dot-done { background: #1E8A4C; }
+  .pra-upi-status {
+    text-align: center;
+    padding: 20px 8px 8px;
+  }
+  .pra-upi-status-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .pra-upi-status-icon-wait { background: #FFF4E0; color: #B5790C; }
+  .pra-upi-status-icon-ok { background: #E6F7ED; color: #1E8A4C; }
+  .pra-upi-status-icon-bad { background: #FCEDEC; color: #C4392B; }
+  .pra-upi-status-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1A1D24;
+    margin-bottom: 6px;
+  }
+  .pra-upi-status-sub {
+    font-size: 13px;
+    color: #5C6370;
+    line-height: 1.45;
+  }
+  .pra-upi-hint {
+    font-size: 11px;
+    color: #8A8F98;
+    margin-top: 10px;
+    line-height: 1.4;
+  }
 
   /* Dashboard */
   .pra-dash {
@@ -819,6 +1016,38 @@ const STYLE = `
     letter-spacing: 0.04em;
     color: #8A8F98;
     margin: 22px 0 10px;
+  }
+  .pra-detail-section {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid #E4E6EB;
+  }
+  .pra-detail-section .pra-section-title {
+    margin-top: 0;
+  }
+  .pra-detail-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+  }
+  .pra-detail-section-head .pra-section-title {
+    margin: 0;
+  }
+  .pra-detail-section-chevron {
+    color: #8A8F98;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .pra-detail-section-body {
+    margin-top: 12px;
   }
   .pra-timeline { display: flex; flex-direction: column; gap: 0; }
   .pra-tl-item {
@@ -1321,8 +1550,9 @@ function riskScoreFor(result) {
 const STATUS_LABEL = {
   pending: "Waiting",
   processing: "Working…",
-  resolved: "Ready",
+  resolved: "Needs you",
   escalated: "Needs you",
+  done: "Done",
   error: "Failed",
 };
 
@@ -1336,6 +1566,7 @@ const PROBLEM_LABEL = {
   USER_CANCELLED: "Customer cancelled checkout",
   CURRENCY_MISMATCH: "Currency amount mismatch",
   PARTIAL_REFUND: "Refund looks incomplete",
+  CAPTURED: "Payment successful",
 };
 
 const CHECK_LABELS = {
@@ -1369,8 +1600,15 @@ const CHECK_LABELS = {
   "Merchant note parsed": "Read the case note",
 };
 
-function friendlyStatus(status) {
-  return STATUS_LABEL[status] || status || "Waiting";
+function displayStatusKey(status, humanDecision) {
+  if (humanDecision) return "done";
+  if (status === "resolved" || status === "escalated") return "escalated";
+  return status || "pending";
+}
+
+function friendlyStatus(status, humanDecision) {
+  if (humanDecision === "overridden") return "Edited";
+  return STATUS_LABEL[displayStatusKey(status, humanDecision)] || status || "Waiting";
 }
 
 function friendlyProblem(code) {
@@ -1465,6 +1703,9 @@ function buildEvidence(txn) {
   };
   const common = [
     { time: t(-18), title: "Checkout created", desc: `order_id ${txn.orderId} · method ${txn.method}`, tone: "ok" },
+    ...(txn.upiId
+      ? [{ time: t(-15), title: "UPI collect sent", desc: `Collect request to ${txn.upiId}`, tone: "ok" }]
+      : []),
     { time: t(-12), title: "Payment attempted", desc: `payment_id ${txn.id} created on Razorpay`, tone: "ok" },
   ];
   const byCode = {
@@ -1510,6 +1751,11 @@ function buildEvidence(txn) {
       { time: t(-86400), title: "Original capture", desc: `Full amount ${txn.amount}`, tone: "ok" },
       { time: t(-3600), title: "Partial refund posted", desc: `refund_id ${txn.refundId} — less than capture`, tone: "warn" },
       { time: t(0), title: "Customer dispute", desc: "Claims full amount never returned", tone: "bad" },
+    ],
+    CAPTURED: [
+      { time: t(-6), title: "Issuer authorized", desc: `RRN ${txn.rrn}`, tone: "ok" },
+      { time: t(-2), title: "Payment captured", desc: "Razorpay marked payment.captured", tone: "ok" },
+      { time: t(0), title: "Merchant notified", desc: "Order marked paid · webhook delivered", tone: "ok" },
     ],
   };
   return [...common, ...(byCode[txn.gatewayCode] || [{ time: t(0), title: txn.gatewayCode, desc: txn.note, tone: "warn" }])];
@@ -1678,7 +1924,53 @@ const INITIAL_TRANSACTIONS = [
     note: "Customer closed checkout page before completing UPI approval.",
     ts: "14:19:15",
   },
+].map((t) => ({ ...t, paymentStatus: t.paymentStatus || "failed", evidence: buildEvidence(t) }));
+
+const SEED_SUCCESS_PAYMENTS = [
+  {
+    id: "pay_Ok1SuccessA",
+    orderId: "order_OkShop1a",
+    refundId: "—",
+    settlementId: "setl_Ok1a",
+    merchantId: "acc_Hk9mP2Qx",
+    merchantName: "UrbanKart Retail",
+    method: "UPI",
+    upiId: "neha@oksbi",
+    upiApp: "GPay",
+    customerName: "Neha",
+    rrn: "991122334455",
+    deviceId: "dv_ok1",
+    ip: "103.21.44.10",
+    amount: "₹899.00",
+    amountValue: 899,
+    gatewayCode: "CAPTURED",
+    paymentStatus: "success",
+    note: "Payment captured successfully at gateway. Order marked paid.",
+    ts: "13:48:02",
+  },
+  {
+    id: "pay_Ok2SuccessB",
+    orderId: "order_OkShop2b",
+    refundId: "—",
+    settlementId: "setl_Ok2b",
+    merchantId: "acc_Lm4nR8Ty",
+    merchantName: "FreshBasket Groceries",
+    method: "Card",
+    cardLast4: "4242",
+    customerName: "Amit",
+    rrn: "771122334466",
+    deviceId: "dv_ok2",
+    ip: "49.36.12.88",
+    amount: "₹2,150.00",
+    amountValue: 2150,
+    gatewayCode: "CAPTURED",
+    paymentStatus: "success",
+    note: "Card payment authorized and captured. No exception.",
+    ts: "13:55:41",
+  },
 ].map((t) => ({ ...t, evidence: buildEvidence(t) }));
+
+const ALL_INITIAL_TRANSACTIONS = [...SEED_SUCCESS_PAYMENTS, ...INITIAL_TRANSACTIONS];
 
 /* Seeded agent runs so the dashboard has meaningful data on first load */
 const SEED_RESULTS = {
@@ -1809,6 +2101,63 @@ const NOTE_TEMPLATES = {
   CURRENCY_MISMATCH: "Order was placed in one currency but the gateway processed the charge using the wrong conversion.",
   PARTIAL_REFUND: "Refund shows as processed but customer says they never received the full amount back.",
 };
+
+const UPI_APPS = ["GPay", "PhonePe", "Paytm", "BHIM"];
+const NETBANKING_BANKS = ["HDFC Bank", "ICICI Bank", "SBI", "Axis Bank", "Kotak"];
+
+const UPI_FAIL_OUTCOMES = [
+  { gatewayCode: "TIMEOUT_ERROR", weight: 28, payingMsg: "Waiting for bank confirmation…" },
+  { gatewayCode: "INSUFFICIENT_FUNDS", weight: 22, payingMsg: "Checking account balance…" },
+  { gatewayCode: "USER_CANCELLED", weight: 18, payingMsg: "Waiting for approval in your UPI app…" },
+  { gatewayCode: "RISK_HOLD", weight: 14, payingMsg: "Running a quick safety check…" },
+  { gatewayCode: "WEBHOOK_DELAY", weight: 10, payingMsg: "Confirming payment with the store…" },
+  { gatewayCode: "DUPLICATE_REF", weight: 8, payingMsg: "Matching this with a recent payment…" },
+];
+
+function pickGatewayOutcome(method) {
+  // ~15% succeed. Rest fail and create an ops case.
+  if (Math.random() < 0.15) {
+    return {
+      ok: true,
+      steps: method === "UPI"
+        ? ["Creating Razorpay order", "Sending UPI collect", "Bank authorized", "Payment captured"]
+        : method === "Card"
+          ? ["Creating Razorpay order", "Contacting card network", "Issuer authorized", "Payment captured"]
+          : ["Creating Razorpay order", "Redirecting to bank", "Netbanking authorized", "Payment captured"],
+    };
+  }
+  const total = UPI_FAIL_OUTCOMES.reduce((s, o) => s + o.weight, 0);
+  let roll = Math.random() * total;
+  let picked = UPI_FAIL_OUTCOMES[0];
+  for (const o of UPI_FAIL_OUTCOMES) {
+    roll -= o.weight;
+    if (roll <= 0) {
+      picked = o;
+      break;
+    }
+  }
+  const failSteps =
+    method === "UPI"
+      ? ["Creating Razorpay order", "Sending UPI collect", picked.payingMsg, "Gateway returned failure"]
+      : method === "Card"
+        ? ["Creating Razorpay order", "Tokenizing card", "Waiting for issuer", "Gateway returned failure"]
+        : ["Creating Razorpay order", "Opening netbanking session", "Waiting for bank", "Gateway returned failure"];
+  return { ok: false, gatewayCode: picked.gatewayCode, steps: failSteps };
+}
+
+function isValidUpiId(vpa) {
+  return /^[a-zA-Z0-9._-]{2,}@[a-zA-Z]{2,}$/.test((vpa || "").trim());
+}
+
+function formatCardInput(value) {
+  const digits = value.replace(/\D/g, "").slice(0, 16);
+  return digits.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+}
+
+function cardLast4(value) {
+  const digits = (value || "").replace(/\D/g, "");
+  return digits.length >= 4 ? digits.slice(-4) : "";
+}
 
 function randomTxnId() {
   const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -2123,7 +2472,11 @@ function computeMetrics(transactions, results) {
   const reviewerRejects = finished.reduce((sum, r) => sum + (r.reviews || []).filter((x) => !x.approved).length, 0);
   const reviewerApproves = finished.reduce((sum, r) => sum + (r.reviews || []).filter((x) => x.approved).length, 0);
   const autoResolved = finished.filter((r) => r.status === "resolved" && r.humanDecision === "approved").length;
-  const humanNeeded = finished.filter((r) => r.status === "escalated" || r.humanDecision === "overridden" || !r.humanDecision).length;
+  const humanNeeded = transactions.filter((t) => {
+    const r = results[t.id];
+    if (!r || r.humanDecision) return false;
+    return r.status === "escalated" || r.status === "resolved";
+  }).length;
 
   const classCounts = {};
   finished.forEach((r) => {
@@ -2147,6 +2500,7 @@ function computeMetrics(transactions, results) {
       id: t.id,
       amount: t.amount,
       status: results[t.id].status,
+      humanDecision: results[t.id].humanDecision,
       action: results[t.id].finalProposal?.action || results[t.id].proposal?.action || "In progress",
       classification: results[t.id].investigation?.classification || "—",
       confidence: results[t.id].investigation?.confidence,
@@ -2156,7 +2510,7 @@ function computeMetrics(transactions, results) {
   const atRiskTxns = transactions.filter((t) => {
     const r = results[t.id];
     if (!r) return ["TIMEOUT_ERROR", "DUPLICATE_REF", "RISK_HOLD", "WEBHOOK_DELAY", "PARTIAL_REFUND", "CURRENCY_MISMATCH"].includes(t.gatewayCode);
-    if (r.status === "escalated") return true;
+    if (r.status === "escalated" && !r.humanDecision) return true;
     if (r.status === "resolved" && !r.humanDecision) return true;
     if (r.status === "processing" || r.status === "pending") return ["TIMEOUT_ERROR", "DUPLICATE_REF", "RISK_HOLD", "WEBHOOK_DELAY", "PARTIAL_REFUND", "CURRENCY_MISMATCH"].includes(t.gatewayCode);
     return false;
@@ -2281,10 +2635,12 @@ function AgentLiveWorkflow({ txn, result, onApprove, onOverride, onRun, compact 
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-          <span className={`pra-badge pra-badge-${statusKey}`}>{friendlyStatus(statusKey)}</span>
-          {onRun && statusKey !== "processing" && (
+          <span className={`pra-badge pra-badge-${displayStatusKey(statusKey, result?.humanDecision)}`}>
+            {friendlyStatus(statusKey, result?.humanDecision)}
+          </span>
+          {onRun && statusKey !== "processing" && statusKey !== "resolved" && statusKey !== "escalated" && (
             <button className="pra-btn pra-btn-primary" onClick={onRun}>
-              {result && (statusKey === "resolved" || statusKey === "escalated" || statusKey === "error") ? "Run again" : "Start AI review"}
+              {statusKey === "error" ? "Try again" : "Start AI review"}
             </button>
           )}
         </div>
@@ -2494,14 +2850,13 @@ function Dashboard({ metrics, onOpenQueue, onOpenTxn }) {
       <div className="pra-dash-inner">
         <div className="pra-dash-hero">
           <div>
-            <h1>Razorpay payment ops</h1>
+            <h1>Payment problems, sorted</h1>
             <p>
-              Mock AI console for merchant payment exceptions — Instant Refunds, webhook replay,
-              Risk holds, and human escalation with full evidence and audit.
+              AI reviews each case, suggests a fix, and asks you only when it needs a human decision.
             </p>
           </div>
           <button className="pra-btn pra-btn-primary" onClick={onOpenQueue}>
-            Open resolution queue →
+            Open cases →
           </button>
         </div>
 
@@ -2517,9 +2872,9 @@ function Dashboard({ metrics, onOpenQueue, onOpenTxn }) {
             <div className="pra-kpi-hint">{formatINR(metrics.recoveredAmount)} cleared by agents</div>
           </div>
           <div className="pra-kpi">
-            <div className="pra-kpi-label">Escalated</div>
-            <div className="pra-kpi-value" style={{ color: "#C4392B" }}>{metrics.escalated}</div>
-            <div className="pra-kpi-hint">{metrics.revisionCount} revision loops fired</div>
+            <div className="pra-kpi-label">Needs you</div>
+            <div className="pra-kpi-value" style={{ color: "#C4392B" }}>{metrics.humanNeeded}</div>
+            <div className="pra-kpi-hint">Waiting for your decision</div>
           </div>
           <div className="pra-kpi">
             <div className="pra-kpi-label">Avg confidence</div>
@@ -2541,7 +2896,7 @@ function Dashboard({ metrics, onOpenQueue, onOpenTxn }) {
                 { label: "Resolved by agent", count: metrics.resolvedByResolver, color: "#B5790C" },
                 { label: "Risk reviewed", count: metrics.reviewed, color: "#7C4FD8" },
                 { label: "Closed", count: metrics.resolved, color: "#1E8A4C" },
-                { label: "Escalated", count: metrics.escalated, color: "#C4392B" },
+                { label: "Needs you", count: metrics.escalated, color: "#C4392B" },
               ].map((row) => (
                 <div className="pra-funnel-row" key={row.label}>
                   <div className="pra-funnel-label">{row.label}</div>
@@ -2651,7 +3006,7 @@ function Dashboard({ metrics, onOpenQueue, onOpenTxn }) {
             <div className="pra-card-sub">Where agents stop and people start</div>
             <div className="pra-bar-list" style={{ marginTop: 4 }}>
               <div className="pra-kpi" style={{ padding: "14px 0", border: "none" }}>
-                <div className="pra-kpi-label">Needs human</div>
+                <div className="pra-kpi-label">Needs you</div>
                 <div className="pra-kpi-value" style={{ fontSize: 24 }}>{metrics.humanNeeded}</div>
               </div>
               <div className="pra-kpi" style={{ padding: "14px 0", border: "none" }}>
@@ -2688,7 +3043,9 @@ function Dashboard({ metrics, onOpenQueue, onOpenTxn }) {
                       {row.revisions > 0 ? `${row.revisions} revision${row.revisions > 1 ? "s" : ""}` : "first pass"}
                     </div>
                   </div>
-                  <span className={`pra-badge pra-badge-${row.status}`}>{row.status}</span>
+                  <span className={`pra-badge pra-badge-${displayStatusKey(row.status, row.humanDecision)}`}>
+                    {friendlyStatus(row.status, row.humanDecision)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -2983,14 +3340,6 @@ function IconQueue() {
     </svg>
   );
 }
-function IconEscalate() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M8 2.5v7M5.5 6.5 8 9l2.5-2.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M3 12.5h10" strokeLinecap="round" />
-    </svg>
-  );
-}
 function IconAgents() {
   return (
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -3000,90 +3349,251 @@ function IconAgents() {
   );
 }
 
+function IconTxns() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="2.5" y="2.5" width="11" height="11" rx="1.5" />
+      <path d="M5 6h6M5 8.5h6M5 11h3.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
-  { id: "dashboard", label: "Overview", section: "Main", Icon: IconDash },
+  { id: "dashboard", label: "Home", section: "Main", Icon: IconDash },
   { id: "workspace", label: "Cases", section: "Main", Icon: IconQueue },
-  { id: "escalations", label: "Needs you", section: "Main", Icon: IconEscalate },
-  { id: "agents", label: "AI helpers", section: "Learn more", Icon: IconAgents },
+  { id: "transactions", label: "All transactions", section: "Main", Icon: IconTxns },
+  { id: "agents", label: "How AI works", section: "Learn", Icon: IconAgents },
 ];
 
 const PAGE_META = {
-  dashboard: { title: "Overview", sub: "Money at risk and how cases are going" },
-  workspace: { title: "Cases", sub: "Pick a payment problem and watch AI review it" },
-  escalations: { title: "Needs you", sub: "Cases waiting for a human decision" },
-  agents: { title: "AI helpers", sub: "Who does what in the review" },
+  dashboard: { title: "Home", sub: "A quick look at payment problems" },
+  workspace: { title: "Cases", sub: "Failed payments that need review" },
+  transactions: { title: "All transactions", sub: "Every payment from checkout — paid and failed" },
+  agents: { title: "How AI works", sub: "The 3 helpers behind each review" },
 };
 
 export default function PaymentResolutionAgent() {
   const [view, setView] = useState("workspace");
-  const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
+  const [transactions, setTransactions] = useState(ALL_INITIAL_TRANSACTIONS);
   const [results, setResults] = useState(SEED_RESULTS);
   const [selectedId, setSelectedId] = useState(INITIAL_TRANSACTIONS[0].id);
   const [overrideText, setOverrideText] = useState("");
   const [overriding, setOverriding] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [form, setForm] = useState({ amount: "", gatewayCode: GATEWAY_CODES[0], note: "" });
-  const [formError, setFormError] = useState("");
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [payStep, setPayStep] = useState("gateway"); // gateway | paying | result
+  const [payMethod, setPayMethod] = useState("upi"); // upi | card | netbanking
+  const [payForm, setPayForm] = useState({
+    amount: "1,299.00",
+    name: "Rahul Sharma",
+    upiId: "rahul@okhdfcbank",
+    upiApp: "GPay",
+    cardNumber: "4111 1111 1111 1111",
+    expiry: "12/28",
+    cvv: "123",
+    bank: "HDFC Bank",
+  });
+  const [payError, setPayError] = useState("");
+  const [payProgress, setPayProgress] = useState({ step: 0, steps: [] });
+  const [payResult, setPayResult] = useState(null);
+  const [checkoutOrderId, setCheckoutOrderId] = useState(() => `order_${randomSuffix(10)}`);
   const [navOpen, setNavOpen] = useState(false);
   const [mobileShowDetail, setMobileShowDetail] = useState(false);
-  const [showMoreDetails, setShowMoreDetails] = useState(false);
+  const [openSections, setOpenSections] = useState({
+    payment: false,
+    timeline: false,
+    log: false,
+  });
+
+  function toggleSection(key) {
+    setOpenSections((s) => ({ ...s, [key]: !s[key] }));
+  }
+  const [queueFilter, setQueueFilter] = useState("all"); // all | needsYou
 
   const selected = transactions.find((t) => t.id === selectedId);
   const selectedResult = results[selectedId];
   const metrics = computeMetrics(transactions, results);
 
-  // Escalations view: show escalated + resolved awaiting human decision
-  const displayedTxns = view === "escalations"
-    ? transactions.filter((t) => {
-        const r = results[t.id];
-        if (!r) return false;
-        if (r.status === "escalated") return true;
-        if ((r.status === "resolved" || r.status === "escalated") && !r.humanDecision) return true;
-        return false;
-      })
-    : transactions;
+  function needsYou(txn) {
+    if (txn.paymentStatus === "success") return false;
+    const r = results[txn.id];
+    if (!r || r.humanDecision) return false;
+    return r.status === "escalated" || r.status === "resolved";
+  }
 
-  function addTransaction() {
-    if (!form.amount.trim()) {
-      setFormError("Amount is required.");
-      return;
-    }
-    const amountValue = parseAmount(form.amount);
-    if (!amountValue) {
-      setFormError("Enter a valid amount.");
-      return;
-    }
+  const caseTxns = transactions.filter((t) => t.paymentStatus !== "success");
+  const needsYouTxns = caseTxns.filter(needsYou);
+  const listSource = view === "transactions" ? transactions : caseTxns;
+  const displayedTxns =
+    view === "workspace" && queueFilter === "needsYou" ? needsYouTxns : listSource;
+
+  function recordPayment({
+    amount,
+    gatewayCode,
+    upiId,
+    customerName,
+    method = "UPI",
+    cardLast4: last4,
+    bankName,
+    upiApp,
+    paymentStatus = "failed",
+  }) {
+    const amountValue = typeof amount === "number" ? amount : parseAmount(amount);
     const displayAmount = `₹${amountValue.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const merchant = MERCHANTS[Math.floor(Math.random() * MERCHANTS.length)];
-    const method = METHODS[Math.floor(Math.random() * METHODS.length)];
-    const note = NOTE_TEMPLATES[form.gatewayCode] || "No further context provided.";
+    const noteBase =
+      paymentStatus === "success"
+        ? "Payment captured successfully at gateway. Order marked paid."
+        : (NOTE_TEMPLATES[gatewayCode] || "No further context provided.");
+    const capturedBits = [
+      upiId ? `UPI ${upiId}` : null,
+      upiApp ? `via ${upiApp}` : null,
+      last4 ? `card •••• ${last4}` : null,
+      bankName ? `bank ${bankName}` : null,
+      customerName ? `customer ${customerName}` : null,
+    ].filter(Boolean);
+    const note = capturedBits.length
+      ? `${noteBase} Captured from gateway checkout (${capturedBits.join(", ")}).`
+      : `${noteBase} Captured from gateway checkout.`;
     const txnBase = {
       id: randomTxnId(),
       orderId: `order_${randomSuffix(10)}`,
-      refundId: form.gatewayCode === "PARTIAL_REFUND" ? `rfnd_${randomSuffix(8)}` : "—",
-      settlementId: ["INSUFFICIENT_FUNDS", "USER_CANCELLED"].includes(form.gatewayCode) ? "—" : `setl_${randomSuffix(6)}`,
+      refundId: gatewayCode === "PARTIAL_REFUND" ? `rfnd_${randomSuffix(8)}` : "—",
+      settlementId: paymentStatus === "success"
+        ? `setl_${randomSuffix(6)}`
+        : (["INSUFFICIENT_FUNDS", "USER_CANCELLED"].includes(gatewayCode) ? "—" : `setl_${randomSuffix(6)}`),
       merchantId: merchant.id,
       merchantName: merchant.name,
       method,
-      rrn: ["INSUFFICIENT_FUNDS", "USER_CANCELLED"].includes(form.gatewayCode) ? "—" : String(Math.floor(100000000000 + Math.random() * 899999999999)),
+      upiId: upiId || undefined,
+      upiApp: upiApp || undefined,
+      customerName: customerName || undefined,
+      cardLast4: last4 || undefined,
+      bankName: bankName || undefined,
+      rrn: paymentStatus === "success" || !["INSUFFICIENT_FUNDS", "USER_CANCELLED"].includes(gatewayCode)
+        ? String(Math.floor(100000000000 + Math.random() * 899999999999))
+        : "—",
       deviceId: `dv_${randomSuffix(4)}`,
       ip: `${Math.floor(Math.random() * 200) + 1}.${Math.floor(Math.random() * 200)}.${Math.floor(Math.random() * 200)}.${Math.floor(Math.random() * 200)}`,
       amount: displayAmount,
       amountValue,
-      gatewayCode: form.gatewayCode,
+      gatewayCode,
+      paymentStatus,
       note,
       ts: nowTs(),
-      duplicatePaymentId: form.gatewayCode === "DUPLICATE_REF" ? randomTxnId() : undefined,
+      duplicatePaymentId: gatewayCode === "DUPLICATE_REF" ? randomTxnId() : undefined,
     };
     const txn = { ...txnBase, evidence: buildEvidence(txnBase) };
     setTransactions((t) => [txn, ...t]);
     setSelectedId(txn.id);
-    setForm({ amount: "", gatewayCode: GATEWAY_CODES[0], note: "" });
-    setFormError("");
-    setShowAddForm(false);
-    setView("workspace");
-    setMobileShowDetail(true);
+    setView(paymentStatus === "success" ? "transactions" : "workspace");
+    setQueueFilter("all");
     setNavOpen(false);
+    return txn;
+  }
+
+  function openCheckout() {
+    setPayStep("gateway");
+    setPayMethod("upi");
+    setPayError("");
+    setPayResult(null);
+    setPayProgress({ step: 0, steps: [] });
+    setCheckoutOrderId(`order_${randomSuffix(10)}`);
+    setShowCheckout(true);
+  }
+
+  function closeCheckout() {
+    setShowCheckout(false);
+    setPayStep("gateway");
+    setPayError("");
+    setPayResult(null);
+  }
+
+  async function startGatewayPayment() {
+    const amountValue = parseAmount(payForm.amount);
+    if (!amountValue) {
+      setPayError("Enter a valid amount.");
+      return;
+    }
+    if (!payForm.name.trim()) {
+      setPayError("Enter the customer name on the payment.");
+      return;
+    }
+
+    if (payMethod === "upi") {
+      if (!isValidUpiId(payForm.upiId)) {
+        setPayError("Enter a UPI ID like name@okhdfcbank");
+        return;
+      }
+    } else if (payMethod === "card") {
+      const digits = payForm.cardNumber.replace(/\D/g, "");
+      if (digits.length < 16) {
+        setPayError("Enter a 16-digit card number (demo).");
+        return;
+      }
+      if (!/^\d{2}\/\d{2}$/.test(payForm.expiry.trim())) {
+        setPayError("Enter expiry as MM/YY");
+        return;
+      }
+      if (!/^\d{3,4}$/.test(payForm.cvv.trim())) {
+        setPayError("Enter a valid CVV");
+        return;
+      }
+    } else if (payMethod === "netbanking") {
+      if (!payForm.bank) {
+        setPayError("Pick a bank");
+        return;
+      }
+    }
+
+    setPayError("");
+    const methodLabel = payMethod === "upi" ? "UPI" : payMethod === "card" ? "Card" : "Netbanking";
+    const outcome = pickGatewayOutcome(methodLabel);
+    setPayProgress({ step: 0, steps: outcome.steps });
+    setPayStep("paying");
+
+    for (let i = 0; i < outcome.steps.length; i++) {
+      setPayProgress({ step: i, steps: outcome.steps });
+      await sleep(i === outcome.steps.length - 1 ? 700 : 850);
+    }
+    setPayProgress({ step: outcome.steps.length - 1, steps: outcome.steps });
+
+    const payPayload = {
+      amount: amountValue,
+      upiId: payMethod === "upi" ? payForm.upiId.trim() : undefined,
+      upiApp: payMethod === "upi" ? payForm.upiApp : undefined,
+      customerName: payForm.name.trim(),
+      method: methodLabel,
+      cardLast4: payMethod === "card" ? cardLast4(payForm.cardNumber) : undefined,
+      bankName: payMethod === "netbanking" ? payForm.bank : undefined,
+    };
+
+    if (outcome.ok) {
+      const txn = recordPayment({
+        ...payPayload,
+        gatewayCode: "CAPTURED",
+        paymentStatus: "success",
+      });
+      setPayResult({ ok: true, method: methodLabel, txnId: txn.id });
+      setPayStep("result");
+      return;
+    }
+
+    const txn = recordPayment({
+      ...payPayload,
+      gatewayCode: outcome.gatewayCode,
+      paymentStatus: "failed",
+    });
+    setPayResult({ ok: false, gatewayCode: outcome.gatewayCode, txnId: txn.id, method: methodLabel });
+    setPayStep("result");
+  }
+
+  function openPaymentRecord() {
+    if (payResult?.txnId) {
+      setSelectedId(payResult.txnId);
+      setMobileShowDetail(true);
+      setView(payResult.ok ? "transactions" : "workspace");
+    }
+    closeCheckout();
   }
 
   async function runAgent(txn) {
@@ -3136,7 +3646,6 @@ export default function PaymentResolutionAgent() {
     setOverriding(false);
     setOverrideText("");
     setMobileShowDetail(true);
-    setShowMoreDetails(false);
   }
 
   function openTxnFromDash(id) {
@@ -3149,33 +3658,13 @@ export default function PaymentResolutionAgent() {
     setView(nextView);
     setNavOpen(false);
     setMobileShowDetail(false);
-    if (nextView === "escalations") {
-      const first = transactions.find((t) => {
-        const r = results[t.id];
-        if (!r) return false;
-        if (r.status === "escalated") return true;
-        if (r.status === "resolved" && !r.humanDecision) return true;
-        return false;
-      });
-      if (first) {
-        setSelectedId(first.id);
-        setOverriding(false);
-        setOverrideText("");
-      }
-    }
   }
 
   const status = selectedResult?.status || "pending";
   const page = PAGE_META[view] || PAGE_META.dashboard;
-  const pendingCount = metrics.pending;
-  const escalationNavCount = metrics.escalated + transactions.filter((t) => {
-    const r = results[t.id];
-    return r?.status === "resolved" && !r.humanDecision;
-  }).length;
-
   const navCounts = {
-    workspace: pendingCount,
-    escalations: escalationNavCount,
+    workspace: caseTxns.length,
+    transactions: transactions.length,
   };
 
   let lastSection = null;
@@ -3212,9 +3701,7 @@ export default function PaymentResolutionAgent() {
                   <span className="pra-side-icon"><item.Icon /></span>
                   <span className="pra-side-label">{item.label}</span>
                   {count > 0 && (
-                    <span className={`pra-side-count ${item.id === "escalations" ? "pra-side-count-alert" : ""}`}>
-                      {count}
-                    </span>
+                    <span className="pra-side-count">{count}</span>
                   )}
                 </button>
               </div>
@@ -3222,7 +3709,7 @@ export default function PaymentResolutionAgent() {
           })}
         </nav>
         <div className="pra-sidebar-foot">
-          Investigator → Planner → Safety → You
+          AI checks · You decide
         </div>
       </aside>
 
@@ -3232,7 +3719,7 @@ export default function PaymentResolutionAgent() {
             <button type="button" className="pra-menu-btn" aria-label="Open menu" onClick={() => setNavOpen(true)}>
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" strokeLinecap="round" /></svg>
             </button>
-            {(view === "workspace" || view === "escalations") && mobileShowDetail && (
+            {(view === "workspace" || view === "transactions") && mobileShowDetail && (
               <button type="button" className="pra-back-btn" aria-label="Back to list" onClick={() => setMobileShowDetail(false)}>
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M10 3.5 4.5 8 10 12.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
@@ -3248,16 +3735,16 @@ export default function PaymentResolutionAgent() {
               <div className="pra-stat-label">₹ at risk</div>
             </div>
             <div>
-              <div className="pra-stat-value">{metrics.processed}</div>
-              <div className="pra-stat-label">Processed</div>
+              <div className="pra-stat-value" style={{ color: "#C4392B" }}>{needsYouTxns.length}</div>
+              <div className="pra-stat-label">Needs you</div>
             </div>
             <div>
-              <div className="pra-stat-value" style={{ color: "#7C4FD8" }}>{metrics.revisionCount}</div>
-              <div className="pra-stat-label">Revisions</div>
+              <div className="pra-stat-value">{caseTxns.length}</div>
+              <div className="pra-stat-label">Cases</div>
             </div>
             <div>
-              <div className="pra-stat-value" style={{ color: "#C4392B" }}>{metrics.escalated}</div>
-              <div className="pra-stat-label">Escalated</div>
+              <div className="pra-stat-value">{transactions.length}</div>
+              <div className="pra-stat-label">Payments</div>
             </div>
           </div>
         </header>
@@ -3272,29 +3759,58 @@ export default function PaymentResolutionAgent() {
 
         {view === "agents" && <AgentsView metrics={metrics} />}
 
-        {(view === "workspace" || view === "escalations") && (
+        {(view === "workspace" || view === "transactions") && (
         <div className={`pra-body ${workspaceMode}`}>
           <aside className="pra-queue">
             <div className="pra-queue-toolbar">
-              {view === "workspace" ? (
-                <button className="pra-btn pra-btn-ghost pra-btn-sm" onClick={() => setShowAddForm(true)}>
-                  + Add a case
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                {view === "workspace" ? (
+                  <div className="pra-filter-row">
+                    <button
+                      type="button"
+                      className={`pra-filter-btn ${queueFilter === "all" ? "pra-filter-btn-active" : ""}`}
+                      onClick={() => setQueueFilter("all")}
+                    >
+                      All<span className="pra-filter-count">{caseTxns.length}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`pra-filter-btn ${queueFilter === "needsYou" ? "pra-filter-btn-active" : ""}`}
+                      onClick={() => {
+                        setQueueFilter("needsYou");
+                        if (needsYouTxns.length && !needsYouTxns.find((t) => t.id === selectedId)) {
+                          setSelectedId(needsYouTxns[0].id);
+                          setOverriding(false);
+                          setOverrideText("");
+                        }
+                      }}
+                    >
+                      Needs you
+                      {needsYouTxns.length > 0 && <span className="pra-filter-count">{needsYouTxns.length}</span>}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="pra-muted" style={{ fontSize: 12, padding: "4px 2px" }}>
+                    {transactions.length} payment{transactions.length === 1 ? "" : "s"}
+                  </div>
+                )}
+                <button className="pra-btn pra-btn-ghost pra-btn-sm" onClick={openCheckout}>
+                  Pay now
                 </button>
-              ) : (
-                <div className="pra-muted" style={{ fontSize: 12, padding: "4px 2px" }}>
-                  {displayedTxns.length} waiting for you
-                </div>
-              )}
+              </div>
             </div>
             <div className="pra-queue-list">
               {displayedTxns.length === 0 && (
                 <div className="pra-muted" style={{ padding: 20, fontSize: 13 }}>
-                  {view === "escalations" ? "Nothing needs you right now." : "No cases yet."}
+                  {view === "workspace"
+                    ? (queueFilter === "needsYou" ? "Nothing needs you right now." : "No failed cases yet.")
+                    : "No payments yet. Tap Pay now to try checkout."}
                 </div>
               )}
               {displayedTxns.map((t) => {
                 const r = results[t.id];
                 const rowStatus = r?.status || "pending";
+                const isPaid = t.paymentStatus === "success";
                 return (
                   <div
                     key={t.id}
@@ -3303,10 +3819,16 @@ export default function PaymentResolutionAgent() {
                   >
                     <div className="pra-row-top">
                       <span className="pra-row-id" style={{ fontWeight: 600, color: "#1A1D24" }}>{friendlyProblem(t.gatewayCode)}</span>
-                      <span className={`pra-badge pra-badge-${rowStatus}`}>{friendlyStatus(rowStatus)}</span>
+                      {isPaid ? (
+                        <span className="pra-badge pra-badge-done">Paid</span>
+                      ) : (
+                        <span className={`pra-badge pra-badge-${displayStatusKey(rowStatus, r?.humanDecision)}`}>
+                          {friendlyStatus(rowStatus, r?.humanDecision)}
+                        </span>
+                      )}
                     </div>
                     <div className="pra-row-amount">{t.amount}</div>
-                    <div className="pra-row-code">{t.merchantName || "Store"} · {t.method}</div>
+                    <div className="pra-row-code">{t.merchantName || "Store"} · {t.method}{isPaid ? "" : " · case"}</div>
                   </div>
                 );
               })}
@@ -3314,20 +3836,26 @@ export default function PaymentResolutionAgent() {
           </aside>
 
           <main className="pra-detail">
-            {(!selected || (view === "escalations" && !displayedTxns.find((t) => t.id === selectedId))) && (
+            {(!selected || !displayedTxns.find((t) => t.id === selectedId)) && (
               <div className="pra-detail-empty">
-                {view === "escalations" ? "Pick a case that needs your decision" : "Pick a payment problem from the list"}
+                {view === "transactions" ? "Pick a payment to see details" : "Pick a failed payment from the list"}
               </div>
             )}
 
-            {selected && (view !== "escalations" || displayedTxns.find((t) => t.id === selectedId)) && (
+            {selected && displayedTxns.find((t) => t.id === selectedId) && (
             <>
               <div className="pra-detail-header">
                 <div className="pra-detail-header-top">
                   <div>
                     <div className="pra-detail-id" style={{ fontFamily: "inherit" }}>{friendlyProblem(selected.gatewayCode)}</div>
                     <div className="pra-detail-meta">
-                      <span className={`pra-badge pra-badge-${status}`}>{friendlyStatus(status)}</span>
+                      {selected.paymentStatus === "success" ? (
+                        <span className="pra-badge pra-badge-done">Paid</span>
+                      ) : (
+                        <span className={`pra-badge pra-badge-${displayStatusKey(status, selectedResult?.humanDecision)}`}>
+                          {friendlyStatus(status, selectedResult?.humanDecision)}
+                        </span>
+                      )}
                       <span className="pra-chip">{selected.method}</span>
                       <span className="pra-muted" style={{ fontSize: 12 }}>{selected.merchantName}</span>
                     </div>
@@ -3335,7 +3863,7 @@ export default function PaymentResolutionAgent() {
                   <div className="pra-detail-amount">{selected.amount}</div>
                 </div>
                 <p className="pra-detail-note">{selected.note}</p>
-                {selectedResult?.status === "processing" && (
+                {selected.paymentStatus !== "success" && selectedResult?.status === "processing" && (
                   <div className="pra-waiting" style={{ marginTop: 12, padding: "10px 12px" }}>
                     <div className="pra-spinner" />
                     AI is reviewing this case — scroll down to watch each step
@@ -3345,65 +3873,101 @@ export default function PaymentResolutionAgent() {
 
               <div className="pra-detail-body">
                 <div className="pra-detail-inner" style={{ maxWidth: 720 }}>
-                  <div className="pra-section-title" style={{ marginTop: 0 }}>AI review</div>
-                  <p className="pra-muted" style={{ fontSize: 13, marginBottom: 14, lineHeight: 1.45 }}>
-                    Follow the 4 steps below. The blue step is happening now.
-                  </p>
-
-                  {selectedResult?.status === "error" && (
-                    <div style={{ color: "#C4392B", fontSize: 13, marginBottom: 12 }}>
-                      Something went wrong. Tap “Run again” to retry.
+                  {selected.paymentStatus === "success" ? (
+                    <div className="pra-muted" style={{ fontSize: 13, marginBottom: 8, lineHeight: 1.45 }}>
+                      This payment succeeded — it stays in All transactions only. No AI case was opened.
                     </div>
+                  ) : (
+                    <>
+                      <div className="pra-section-title" style={{ marginTop: 0 }}>AI review</div>
+                      <p className="pra-muted" style={{ fontSize: 13, marginBottom: 14, lineHeight: 1.45 }}>
+                        Follow the 4 steps below. The blue step is happening now.
+                      </p>
+
+                      {selectedResult?.status === "error" && (
+                        <div style={{ color: "#C4392B", fontSize: 13, marginBottom: 12 }}>
+                          Something went wrong. Tap “Try again” to retry.
+                        </div>
+                      )}
+
+                      <AgentLiveWorkflow
+                        txn={selected}
+                        result={selectedResult}
+                        compact
+                        onRun={selectedResult?.status === "processing" ? undefined : () => runAgent(selected)}
+                        onApprove={selectedResult && !selectedResult.humanDecision && (selectedResult.status === "resolved" || selectedResult.status === "escalated") ? () => approve() : undefined}
+                        onOverride={selectedResult && !selectedResult.humanDecision && (selectedResult.status === "resolved" || selectedResult.status === "escalated") ? () => beginOverride() : undefined}
+                      />
+                    </>
                   )}
 
-                  <AgentLiveWorkflow
-                    txn={selected}
-                    result={selectedResult}
-                    compact
-                    onRun={selectedResult?.status === "processing" ? undefined : () => runAgent(selected)}
-                    onApprove={selectedResult && !selectedResult.humanDecision && (selectedResult.status === "resolved" || selectedResult.status === "escalated") ? () => approve() : undefined}
-                    onOverride={selectedResult && !selectedResult.humanDecision && (selectedResult.status === "resolved" || selectedResult.status === "escalated") ? () => beginOverride() : undefined}
-                  />
-
-                  <button
-                    className="pra-btn pra-btn-ghost"
-                    style={{ marginTop: 22, width: "100%" }}
-                    onClick={() => setShowMoreDetails((v) => !v)}
-                  >
-                    {showMoreDetails ? "Hide extra details" : "Show extra details"}
-                  </button>
-
-                  {showMoreDetails && (
-                    <>
+                  <div className="pra-detail-section">
+                    <button type="button" className="pra-detail-section-head" onClick={() => toggleSection("payment")}>
                       <div className="pra-section-title">Payment reference</div>
-                      <div className="pra-id-grid" style={{ marginTop: 0 }}>
-                        <div className="pra-id-item"><div className="pra-id-k">Payment</div><div className="pra-mono pra-id-v">{selected.id}</div></div>
-                        <div className="pra-id-item"><div className="pra-id-k">Order</div><div className="pra-mono pra-id-v">{selected.orderId}</div></div>
-                        <div className="pra-id-item"><div className="pra-id-k">Store account</div><div className="pra-mono pra-id-v">{selected.merchantId}</div></div>
-                        <div className="pra-id-item"><div className="pra-id-k">Bank reference</div><div className="pra-mono pra-id-v">{selected.rrn}</div></div>
-                      </div>
-
-                      <div className="pra-section-title">What happened (timeline)</div>
-                      <div className="pra-card" style={{ padding: "16px 16px 4px" }}>
-                        <div className="pra-timeline">
-                          {(selected.evidence || []).map((ev, i) => (
-                            <div className="pra-tl-item" key={i}>
-                              <div className="pra-mono pra-tl-time">{ev.time}</div>
-                              <div className="pra-tl-rail">
-                                <div className={`pra-tl-dot ${ev.tone === "ok" ? "pra-tl-dot-ok" : ev.tone === "bad" ? "pra-tl-dot-bad" : "pra-tl-dot-warn"}`} />
-                              </div>
-                              <div className="pra-tl-body">
-                                <div className="pra-tl-title">{ev.title}</div>
-                                <div className="pra-tl-desc">{ev.desc}</div>
-                              </div>
-                            </div>
-                          ))}
+                      <span className="pra-detail-section-chevron">{openSections.payment ? "▾" : "▸"}</span>
+                    </button>
+                    {openSections.payment && (
+                      <div className="pra-detail-section-body">
+                        <div className="pra-id-grid" style={{ marginTop: 0 }}>
+                          <div className="pra-id-item"><div className="pra-id-k">Payment</div><div className="pra-mono pra-id-v">{selected.id}</div></div>
+                          <div className="pra-id-item"><div className="pra-id-k">Order</div><div className="pra-mono pra-id-v">{selected.orderId}</div></div>
+                          <div className="pra-id-item"><div className="pra-id-k">Store account</div><div className="pra-mono pra-id-v">{selected.merchantId}</div></div>
+                          <div className="pra-id-item"><div className="pra-id-k">Bank reference</div><div className="pra-mono pra-id-v">{selected.rrn}</div></div>
+                          {selected.upiId && (
+                            <div className="pra-id-item"><div className="pra-id-k">UPI ID</div><div className="pra-mono pra-id-v">{selected.upiId}</div></div>
+                          )}
+                          {selected.upiApp && (
+                            <div className="pra-id-item"><div className="pra-id-k">UPI app</div><div className="pra-id-v">{selected.upiApp}</div></div>
+                          )}
+                          {selected.cardLast4 && (
+                            <div className="pra-id-item"><div className="pra-id-k">Card</div><div className="pra-mono pra-id-v">•••• {selected.cardLast4}</div></div>
+                          )}
+                          {selected.bankName && (
+                            <div className="pra-id-item"><div className="pra-id-k">Bank</div><div className="pra-id-v">{selected.bankName}</div></div>
+                          )}
+                          {selected.customerName && (
+                            <div className="pra-id-item"><div className="pra-id-k">Customer</div><div className="pra-id-v">{selected.customerName}</div></div>
+                          )}
                         </div>
                       </div>
+                    )}
+                  </div>
 
-                      {selectedResult && (selectedResult.audit?.length > 0 || selectedResult.investigation) && (
-                        <>
-                          <div className="pra-section-title">Step-by-step log</div>
+                  <div className="pra-detail-section">
+                    <button type="button" className="pra-detail-section-head" onClick={() => toggleSection("timeline")}>
+                      <div className="pra-section-title">What happened</div>
+                      <span className="pra-detail-section-chevron">{openSections.timeline ? "▾" : "▸"}</span>
+                    </button>
+                    {openSections.timeline && (
+                      <div className="pra-detail-section-body">
+                        <div className="pra-card" style={{ padding: "16px 16px 4px" }}>
+                          <div className="pra-timeline">
+                            {(selected.evidence || []).map((ev, i) => (
+                              <div className="pra-tl-item" key={i}>
+                                <div className="pra-mono pra-tl-time">{ev.time}</div>
+                                <div className="pra-tl-rail">
+                                  <div className={`pra-tl-dot ${ev.tone === "ok" ? "pra-tl-dot-ok" : ev.tone === "bad" ? "pra-tl-dot-bad" : "pra-tl-dot-warn"}`} />
+                                </div>
+                                <div className="pra-tl-body">
+                                  <div className="pra-tl-title">{ev.title}</div>
+                                  <div className="pra-tl-desc">{ev.desc}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {selectedResult && (selectedResult.audit?.length > 0 || selectedResult.investigation) && (
+                    <div className="pra-detail-section">
+                      <button type="button" className="pra-detail-section-head" onClick={() => toggleSection("log")}>
+                        <div className="pra-section-title">Step-by-step log</div>
+                        <span className="pra-detail-section-chevron">{openSections.log ? "▾" : "▸"}</span>
+                      </button>
+                      {openSections.log && (
+                        <div className="pra-detail-section-body">
                           <div className="pra-card">
                             <div className="pra-audit">
                               {(selectedResult.audit || buildAuditFromResult(selectedResult)).map((entry, i) => (
@@ -3417,9 +3981,9 @@ export default function PaymentResolutionAgent() {
                               ))}
                             </div>
                           </div>
-                        </>
+                        </div>
                       )}
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
@@ -3448,42 +4012,207 @@ export default function PaymentResolutionAgent() {
           </div>
         )}
 
-        {showAddForm && (
-          <div className="pra-overlay" onClick={() => { setShowAddForm(false); setFormError(""); }}>
-            <div className="pra-modal" onClick={(e) => e.stopPropagation()}>
-              <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 18, letterSpacing: "-0.02em" }}>Add a case</div>
-
-              <span className="pra-field-label">Amount (₹)</span>
-              <input
-                className="pra-input"
-                placeholder="1,250.00"
-                value={form.amount}
-                onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
-                style={{ marginBottom: 14 }}
-                autoFocus
-              />
-
-              <span className="pra-field-label">What went wrong</span>
-              <select
-                className="pra-input"
-                value={form.gatewayCode}
-                onChange={(e) => setForm((f) => ({ ...f, gatewayCode: e.target.value }))}
-                style={{ marginBottom: 18 }}
-              >
-                {GATEWAY_CODES.map((c) => <option key={c} value={c}>{friendlyProblem(c)}</option>)}
-              </select>
-
-              <div className="pra-modal-actions">
-                <button className="pra-btn pra-btn-primary" style={{ flex: 1 }} onClick={addTransaction}>
-                  Add to list
-                </button>
-                <button className="pra-btn pra-btn-ghost" onClick={() => { setShowAddForm(false); setFormError(""); }}>
-                  Cancel
-                </button>
+        {showCheckout && (
+          <div className="pra-overlay" onClick={() => { if (payStep !== "paying") closeCheckout(); }}>
+            <div className="pra-pg" onClick={(e) => e.stopPropagation()}>
+              <div className="pra-pg-top">
+                <div className="pra-pg-top-row">
+                  <div>
+                    <div className="pra-pg-merchant">UrbanKart Retail</div>
+                    <div className="pra-pg-order">{checkoutOrderId}</div>
+                  </div>
+                  <div className="pra-pg-badge">Razorpay · demo</div>
+                </div>
+                <div className="pra-pg-amount">
+                  ₹{parseAmount(payForm.amount)
+                    ? parseAmount(payForm.amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                    : payForm.amount}
+                </div>
+                <div className="pra-pg-amount-sub">Live checkout simulation · no real money moved</div>
               </div>
-              {formError && (
-                <div style={{ color: "#C4392B", fontSize: 12, marginTop: 12 }}>{formError}</div>
-              )}
+
+              <div className="pra-pg-body">
+                {payStep === "gateway" && (
+                  <>
+                    <div className="pra-pg-tabs">
+                      {[
+                        { id: "upi", label: "UPI" },
+                        { id: "card", label: "Card" },
+                        { id: "netbanking", label: "Netbanking" },
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          className={`pra-pg-tab ${payMethod === tab.id ? "pra-pg-tab-active" : ""}`}
+                          onClick={() => { setPayMethod(tab.id); setPayError(""); }}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <span className="pra-field-label">Amount (₹)</span>
+                    <input
+                      className="pra-input"
+                      value={payForm.amount}
+                      onChange={(e) => setPayForm((f) => ({ ...f, amount: e.target.value }))}
+                      style={{ marginBottom: 12 }}
+                    />
+
+                    <span className="pra-field-label">Customer name</span>
+                    <input
+                      className="pra-input"
+                      value={payForm.name}
+                      onChange={(e) => setPayForm((f) => ({ ...f, name: e.target.value }))}
+                      style={{ marginBottom: 12 }}
+                    />
+
+                    {payMethod === "upi" && (
+                      <>
+                        <span className="pra-field-label">Pay using</span>
+                        <div className="pra-pg-apps">
+                          {UPI_APPS.map((app) => (
+                            <button
+                              key={app}
+                              type="button"
+                              className={`pra-pg-app ${payForm.upiApp === app ? "pra-pg-app-active" : ""}`}
+                              onClick={() => setPayForm((f) => ({ ...f, upiApp: app }))}
+                            >
+                              {app}
+                            </button>
+                          ))}
+                        </div>
+                        <span className="pra-field-label">UPI ID / VPA</span>
+                        <input
+                          className="pra-input"
+                          placeholder="name@okhdfcbank"
+                          value={payForm.upiId}
+                          onChange={(e) => setPayForm((f) => ({ ...f, upiId: e.target.value }))}
+                          style={{ marginBottom: 4 }}
+                        />
+                      </>
+                    )}
+
+                    {payMethod === "card" && (
+                      <>
+                        <span className="pra-field-label">Card number</span>
+                        <input
+                          className="pra-input"
+                          inputMode="numeric"
+                          placeholder="4111 1111 1111 1111"
+                          value={payForm.cardNumber}
+                          onChange={(e) => setPayForm((f) => ({ ...f, cardNumber: formatCardInput(e.target.value) }))}
+                          style={{ marginBottom: 12 }}
+                        />
+                        <div className="pra-pg-row2">
+                          <div>
+                            <span className="pra-field-label">Expiry</span>
+                            <input
+                              className="pra-input"
+                              placeholder="MM/YY"
+                              value={payForm.expiry}
+                              onChange={(e) => setPayForm((f) => ({ ...f, expiry: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <span className="pra-field-label">CVV</span>
+                            <input
+                              className="pra-input"
+                              inputMode="numeric"
+                              placeholder="123"
+                              value={payForm.cvv}
+                              onChange={(e) => setPayForm((f) => ({ ...f, cvv: e.target.value.replace(/\D/g, "").slice(0, 4) }))}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {payMethod === "netbanking" && (
+                      <>
+                        <span className="pra-field-label">Select bank</span>
+                        <select
+                          className="pra-input"
+                          value={payForm.bank}
+                          onChange={(e) => setPayForm((f) => ({ ...f, bank: e.target.value }))}
+                          style={{ marginBottom: 4 }}
+                        >
+                          {NETBANKING_BANKS.map((b) => <option key={b} value={b}>{b}</option>)}
+                        </select>
+                      </>
+                    )}
+
+                    <div className="pra-upi-hint">
+                      Gateway runs live stages (order → authorize → capture). Failures become Cases with the details you entered.
+                    </div>
+
+                    <div className="pra-modal-actions" style={{ marginTop: 16 }}>
+                      <button className="pra-btn pra-btn-primary" style={{ flex: 1 }} onClick={startGatewayPayment}>
+                        Pay ₹{payForm.amount}
+                      </button>
+                      <button className="pra-btn pra-btn-ghost" onClick={closeCheckout}>Cancel</button>
+                    </div>
+                    {payError && (
+                      <div style={{ color: "#C4392B", fontSize: 12, marginTop: 12 }}>{payError}</div>
+                    )}
+                    <div className="pra-pg-secure">🔒 Secured checkout · simulated issuer response</div>
+                  </>
+                )}
+
+                {payStep === "paying" && (
+                  <div className="pra-upi-status">
+                    <div className="pra-upi-status-icon pra-upi-status-icon-wait">
+                      <div className="pra-spinner" style={{ margin: 0 }} />
+                    </div>
+                    <div className="pra-upi-status-title">Processing payment</div>
+                    <div className="pra-upi-status-sub">Talking to the payment gateway…</div>
+                    <div className="pra-pg-steps">
+                      {payProgress.steps.map((label, i) => {
+                        const done = i < payProgress.step;
+                        const on = i === payProgress.step;
+                        return (
+                          <div key={label} className={`pra-pg-step ${done ? "pra-pg-step-done" : ""} ${on ? "pra-pg-step-on" : ""}`}>
+                            <span className={`pra-pg-dot ${done ? "pra-pg-dot-done" : ""} ${on ? "pra-pg-dot-on" : ""}`} />
+                            {label}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {payStep === "result" && payResult?.ok && (
+                  <div className="pra-upi-status">
+                    <div className="pra-upi-status-icon pra-upi-status-icon-ok">✓</div>
+                    <div className="pra-upi-status-title">Payment successful</div>
+                    <div className="pra-upi-status-sub">
+                      Captured via {payResult.method}. Saved under All transactions — no Cases entry.
+                    </div>
+                    <div className="pra-modal-actions" style={{ marginTop: 20 }}>
+                      <button className="pra-btn pra-btn-primary" style={{ flex: 1 }} onClick={openPaymentRecord}>
+                        View payment
+                      </button>
+                      <button className="pra-btn pra-btn-ghost" onClick={closeCheckout}>Done</button>
+                    </div>
+                  </div>
+                )}
+
+                {payStep === "result" && payResult && !payResult.ok && (
+                  <div className="pra-upi-status">
+                    <div className="pra-upi-status-icon pra-upi-status-icon-bad">!</div>
+                    <div className="pra-upi-status-title">Payment failed</div>
+                    <div className="pra-upi-status-sub">
+                      {friendlyProblem(payResult.gatewayCode)}. Added to All transactions and opened as a Case.
+                    </div>
+                    <div className="pra-modal-actions" style={{ marginTop: 20 }}>
+                      <button className="pra-btn pra-btn-primary" style={{ flex: 1 }} onClick={openPaymentRecord}>
+                        Open case
+                      </button>
+                      <button className="pra-btn pra-btn-ghost" onClick={closeCheckout}>Close</button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
