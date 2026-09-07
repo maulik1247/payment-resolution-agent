@@ -1607,6 +1607,7 @@ function displayStatusKey(status, humanDecision) {
 }
 
 function friendlyStatus(status, humanDecision) {
+  if (humanDecision === "auto") return "Auto-closed";
   if (humanDecision === "overridden") return "Edited";
   return STATUS_LABEL[displayStatusKey(status, humanDecision)] || status || "Waiting";
 }
@@ -1796,8 +1797,13 @@ function buildAuditFromResult(result) {
   if (result.humanDecision) {
     entries.push({
       ts: "Human",
-      who: "Ops reviewer",
-      what: result.humanDecision === "approved" ? "Approved agent proposal" : "Overrode draft customer message",
+      who: result.humanDecision === "auto" ? "AI · auto-close" : "Ops reviewer",
+      what:
+        result.humanDecision === "auto"
+          ? `Auto-closed — “${result.finalProposal?.action || result.proposal?.action || "action"}” (no HITL)`
+          : result.humanDecision === "approved"
+            ? "Approved agent proposal"
+            : "Overrode draft customer message",
     });
   }
   return entries;
@@ -2010,7 +2016,6 @@ const SEED_RESULTS = {
     proposal: { action: "Reconcile & mark paid", rationale: "Gateway success is authoritative; force-sync merchant order.", draftMessage: "Payment confirmed on Razorpay. Your FreshBasket order is now marked paid." },
     reviews: [{ attempt: 0, approved: true, reviewNote: "Clear SUCCESS at gateway; reconciliation is correct." }],
     finalProposal: { action: "Reconcile & mark paid", rationale: "Gateway success is authoritative; force-sync merchant order.", draftMessage: "Payment confirmed on Razorpay. Your FreshBasket order is now marked paid." },
-    humanDecision: "approved",
   },
   pay_3Rz8QmT9kL: {
     status: "resolved",
@@ -2052,7 +2057,7 @@ const SEED_RESULTS = {
     proposal: { action: "No action needed", rationale: "Standard issuer decline; nothing to remediate.", draftMessage: "Payment declined by bank due to insufficient funds." },
     reviews: [{ attempt: 0, approved: true, reviewNote: "Correct — NSF declines require no refund or escalation." }],
     finalProposal: { action: "No action needed", rationale: "Standard issuer decline; nothing to remediate.", draftMessage: "Payment declined by bank due to insufficient funds." },
-    humanDecision: "approved",
+    humanDecision: "auto",
   },
   pay_2Xa9JgH4sQ: {
     status: "escalated",
@@ -2106,12 +2111,13 @@ const UPI_APPS = ["GPay", "PhonePe", "Paytm", "BHIM"];
 const NETBANKING_BANKS = ["HDFC Bank", "ICICI Bank", "SBI", "Axis Bank", "Kotak"];
 
 const UPI_FAIL_OUTCOMES = [
-  { gatewayCode: "TIMEOUT_ERROR", weight: 28, payingMsg: "Waiting for bank confirmation…" },
-  { gatewayCode: "INSUFFICIENT_FUNDS", weight: 22, payingMsg: "Checking account balance…" },
-  { gatewayCode: "USER_CANCELLED", weight: 18, payingMsg: "Waiting for approval in your UPI app…" },
-  { gatewayCode: "RISK_HOLD", weight: 14, payingMsg: "Running a quick safety check…" },
-  { gatewayCode: "WEBHOOK_DELAY", weight: 10, payingMsg: "Confirming payment with the store…" },
-  { gatewayCode: "DUPLICATE_REF", weight: 8, payingMsg: "Matching this with a recent payment…" },
+  // Weighted so HITL cases show up often in the demo
+  { gatewayCode: "TIMEOUT_ERROR", weight: 32, payingMsg: "Waiting for bank confirmation…" }, // HITL — refund
+  { gatewayCode: "DUPLICATE_REF", weight: 18, payingMsg: "Matching this with a recent payment…" }, // HITL — refund
+  { gatewayCode: "RISK_HOLD", weight: 16, payingMsg: "Running a quick safety check…" }, // HITL — escalate
+  { gatewayCode: "WEBHOOK_DELAY", weight: 14, payingMsg: "Confirming payment with the store…" }, // HITL — sync
+  { gatewayCode: "INSUFFICIENT_FUNDS", weight: 12, payingMsg: "Checking account balance…" }, // auto-close
+  { gatewayCode: "USER_CANCELLED", weight: 8, payingMsg: "Waiting for approval in your UPI app…" }, // auto-close
 ];
 
 function pickGatewayOutcome(method) {
@@ -2353,6 +2359,12 @@ function fillAmount(text, amount) {
   return (text || "").replaceAll("{amount}", amount);
 }
 
+function shouldAutoClose(proposal) {
+  // Only close when nothing to remediate — no funds moved, no merchant sync, no refund.
+  // Everything else (refunds, reconcile, risk) needs a human.
+  return /^No action needed$/i.test(proposal?.action || "");
+}
+
 /** Local multi-agent simulation — the browser cannot call Anthropic directly (no API key + CORS). */
 async function runPipeline(txn, onStage) {
   const book = playbookFor(txn);
@@ -2391,7 +2403,7 @@ async function runPipeline(txn, onStage) {
       finalStatus: "escalated",
       escalateReason: "Investigator confidence too low to proceed",
       livePhase: "human",
-      liveStatus: "Escalated to human",
+      liveStatus: "Needs you",
     });
     return;
   }
@@ -2432,12 +2444,22 @@ async function runPipeline(txn, onStage) {
 
     if (review.approved) {
       await sleep(400);
-      emit({
-        finalStatus: "resolved",
-        finalProposal: proposal,
-        livePhase: "human",
-        liveStatus: "Awaiting human approval",
-      });
+      if (shouldAutoClose(proposal)) {
+        emit({
+          finalStatus: "resolved",
+          finalProposal: proposal,
+          humanDecision: "auto",
+          livePhase: "done",
+          liveStatus: "Auto-closed by AI",
+        });
+      } else {
+        emit({
+          finalStatus: "resolved",
+          finalProposal: proposal,
+          livePhase: "human",
+          liveStatus: "Needs you — money or risk involved",
+        });
+      }
       return;
     }
   }
@@ -2448,7 +2470,7 @@ async function runPipeline(txn, onStage) {
     escalateReason: "Risk Reviewer did not approve after revisions",
     finalProposal: proposal,
     livePhase: "human",
-    liveStatus: "Escalated to human",
+    liveStatus: "Needs you",
   });
 }
 
@@ -2471,7 +2493,7 @@ function computeMetrics(transactions, results) {
   const firstPassRate = finished.length ? Math.round((firstPassApprovals / finished.length) * 100) : null;
   const reviewerRejects = finished.reduce((sum, r) => sum + (r.reviews || []).filter((x) => !x.approved).length, 0);
   const reviewerApproves = finished.reduce((sum, r) => sum + (r.reviews || []).filter((x) => x.approved).length, 0);
-  const autoResolved = finished.filter((r) => r.status === "resolved" && r.humanDecision === "approved").length;
+  const autoResolved = finished.filter((r) => r.humanDecision === "auto" || (r.status === "resolved" && r.humanDecision === "approved")).length;
   const humanNeeded = transactions.filter((t) => {
     const r = results[t.id];
     if (!r || r.humanDecision) return false;
@@ -2545,12 +2567,14 @@ function phaseRank(phase) {
     reviewer: 5,
     reviewer_done: 6,
     human: 7,
+    done: 8,
   };
   return order[phase] || 0;
 }
 
 function deriveLiveStep(result, phase) {
   if (!result) return 1;
+  if (result.humanDecision === "auto" || phase === "done") return 4;
   if (result.status === "resolved" || result.status === "escalated" || phase === "human") return 4;
   if (phase === "reviewer" || phase === "reviewer_done") return 3;
   if (phase === "resolver" || phase === "resolver_done" || (result.proposalHistory || []).length) return 2;
@@ -2566,7 +2590,8 @@ function AgentLiveWorkflow({ txn, result, onApprove, onOverride, onRun, compact 
   const proposals = result?.proposalHistory || [];
   const reviews = result?.reviews || [];
   const finalAction = result?.finalProposal?.action || result?.proposal?.action;
-  const showHuman = result && (result.status === "resolved" || result.status === "escalated" || phase === "human");
+  const showHuman = result && (result.status === "resolved" || result.status === "escalated" || phase === "human" || phase === "done" || result.humanDecision === "auto");
+  const needsHitl = showHuman && !result?.humanDecision;
   const statusKey = result?.status || "pending";
   const liveStep = deriveLiveStep(result, phase);
   const [viewStep, setViewStep] = useState(liveStep);
@@ -2610,10 +2635,14 @@ function AgentLiveWorkflow({ txn, result, onApprove, onOverride, onRun, compact 
     },
     {
       n: 4,
-      label: "Your decision",
-      sub: step4Done ? (result.humanDecision === "approved" ? "Approved" : "Edited") : showHuman ? "Needs you" : "Waiting",
+      label: result?.humanDecision === "auto" ? "AI closed" : "Your decision",
+      sub: step4Done
+        ? (result.humanDecision === "auto" ? "Auto-closed" : result.humanDecision === "approved" ? "Approved" : "Edited")
+        : needsHitl
+          ? "Needs you"
+          : "Waiting",
       done: step4Done,
-      active: showHuman && !step4Done,
+      active: needsHitl,
       unlocked: showHuman || liveStep >= 4,
     },
   ];
@@ -2796,20 +2825,43 @@ function AgentLiveWorkflow({ txn, result, onApprove, onOverride, onRun, compact 
         <div className="pra-live-node pra-live-human pra-live-node-done">
           <div className="pra-live-node-head">
             <div className="pra-live-node-title">
-              <span style={{ fontSize: 14 }}>👤</span>
-              Your decision
+              <span style={{ fontSize: 14 }}>{result?.humanDecision === "auto" ? "⚡" : "👤"}</span>
+              {result?.humanDecision === "auto" ? "AI closed this" : "Your decision"}
             </div>
             <div className={`pra-live-node-status ${result?.humanDecision ? "pra-live-node-status-done" : "pra-live-node-status-active"}`}>
-              {result?.humanDecision ? (result.humanDecision === "approved" ? "Approved" : "Changed") : showHuman ? "Waiting for you" : "Waiting"}
+              {result?.humanDecision === "auto"
+                ? "Auto-closed"
+                : result?.humanDecision === "approved"
+                  ? "Approved"
+                  : result?.humanDecision === "overridden"
+                    ? "Changed"
+                    : needsHitl
+                      ? "Waiting for you"
+                      : "Waiting"}
             </div>
           </div>
           <div className="pra-live-node-body">
-            {showHuman ? (
+            {result?.humanDecision === "auto" ? (
+              <>
+                <div className="pra-live-action" style={{ fontSize: 16 }}>
+                  AI applied “{finalAction || "the fix"}”
+                </div>
+                <div className="pra-muted" style={{ fontSize: 13, marginTop: 8, lineHeight: 1.45 }}>
+                  Safe to close without a human — no money movement or fraud risk.
+                </div>
+                <div className="pra-muted" style={{ fontSize: 12, marginTop: 12, color: "#1E8A4C", fontWeight: 600 }}>
+                  ✓ Auto-closed — no HITL needed
+                </div>
+              </>
+            ) : showHuman ? (
               <>
                 <div className="pra-live-action" style={{ fontSize: 16 }}>
                   {result.status === "escalated"
                     ? (finalAction ? `Please review: ${finalAction}` : "Please review this case")
                     : `Approve “${finalAction || "the suggestion"}”?`}
+                </div>
+                <div className="pra-muted" style={{ fontSize: 13, marginTop: 6, lineHeight: 1.45 }}>
+                  Needs you — refund, risk, or unclear case.
                 </div>
                 <div className="pra-msg-channel" style={{ marginTop: 8 }}>Message to customer</div>
                 <div className="pra-msg-preview">
@@ -2831,7 +2883,7 @@ function AgentLiveWorkflow({ txn, result, onApprove, onOverride, onRun, compact 
                 )}
               </>
             ) : (
-              <div className="pra-muted" style={{ fontSize: 13 }}>You’ll decide here after the safety check finishes.</div>
+              <div className="pra-muted" style={{ fontSize: 13 }}>AI decides first — you’re only pulled in when needed.</div>
             )}
           </div>
         </div>
@@ -3309,12 +3361,12 @@ function AgentsView({ metrics }) {
             <div className="pra-card-title">Operating rules</div>
             <div className="pra-card-sub">Mock policy for this Razorpay demo</div>
             <ul className="pra-rule-list" style={{ marginTop: 8 }}>
-              <li>Confidence below <strong>{LOW_CONFIDENCE_THRESHOLD}</strong> skips Resolver and goes straight to Escalations.</li>
-              <li>Risk Reviewer may reject up to <strong>2</strong> times; third failure escalates to human.</li>
-              <li>RISK_HOLD never auto-releases — always ends in Risk / human ownership.</li>
-              <li>Duplicate charges must name the secondary <span className="pra-mono">payment_id</span> before refund.</li>
-              <li>Customer messages are drafts only until a human clicks Approve or Override.</li>
-              <li>Every stage is written to the case audit trail for merchant ops review.</li>
+              <li>AI auto-closes only “No action needed” cases (e.g. NSF, user cancelled).</li>
+              <li>Refunds, reconciles, risk holds, and low confidence always need HITL.</li>
+              <li>Confidence below <strong>{LOW_CONFIDENCE_THRESHOLD}</strong> skips Resolver and escalates.</li>
+              <li>Risk Reviewer may reject up to <strong>2</strong> times; then escalate.</li>
+              <li>RISK_HOLD never auto-releases.</li>
+              <li>Every stage is written to the case audit trail.</li>
             </ul>
           </div>
         </div>
