@@ -10,12 +10,39 @@ const STYLE = `
     color: #1A1D24;
     font-family: 'DM Sans', -apple-system, sans-serif;
     min-height: 100vh;
+    min-height: 100dvh;
     height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: row;
     overflow: hidden;
   }
   .pra-mono { font-family: 'IBM Plex Mono', 'Courier New', monospace; }
+
+  .pra-menu-btn, .pra-back-btn, .pra-sidebar-close {
+    display: none;
+    border: 1px solid #D8DADF;
+    background: #FFFFFF;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    color: #1A1D24;
+    padding: 0;
+  }
+  .pra-menu-btn svg, .pra-back-btn svg, .pra-sidebar-close svg { width: 18px; height: 18px; }
+  .pra-sidebar-backdrop {
+    display: none;
+  }
+  .pra-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
 
   /* App sidebar */
   .pra-sidebar {
@@ -653,6 +680,112 @@ const STYLE = `
   @media (max-width: 960px) {
     .pra-kpi-grid { grid-template-columns: repeat(2, 1fr); }
     .pra-grid-2, .pra-grid-3 { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 900px) {
+    .pra-menu-btn, .pra-back-btn { display: inline-flex; }
+    .pra-sidebar-close { display: inline-flex; border-color: rgba(255,255,255,0.2); background: transparent; color: #fff; }
+
+    .pra-sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: min(280px, 86vw);
+      z-index: 60;
+      transform: translateX(-105%);
+      transition: transform 0.22s ease;
+      box-shadow: none;
+    }
+    .pra-sidebar-open {
+      transform: translateX(0);
+      box-shadow: 8px 0 32px rgba(0,0,0,0.28);
+    }
+    .pra-sidebar-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 22, 28, 0.45);
+      z-index: 55;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .pra-header {
+      padding: 12px 14px;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+    }
+    .pra-header-title { font-size: 15px; }
+    .pra-header-sub { display: none; }
+    .pra-stats {
+      width: 100%;
+      gap: 0;
+      justify-content: space-between;
+      padding-top: 4px;
+      border-top: 1px solid #F0F1F3;
+    }
+    .pra-stats > div { flex: 1; min-width: 0; }
+    .pra-stat-value { font-size: 15px; }
+    .pra-stat-label { font-size: 10px; }
+
+    .pra-dash { padding: 16px 14px 32px; }
+    .pra-dash-hero {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .pra-dash-hero h1 { font-size: 22px; }
+    .pra-dash-hero .pra-btn { width: 100%; }
+    .pra-kpi-grid { gap: 10px; }
+    .pra-kpi { padding: 14px; }
+    .pra-kpi-value { font-size: 22px; }
+
+    .pra-body { flex-direction: column; }
+    .pra-queue {
+      width: 100%;
+      border-right: none;
+      display: none;
+    }
+    .pra-detail { display: none; }
+    .pra-mobile-list .pra-queue { display: flex; flex: 1; }
+    .pra-mobile-detail .pra-detail { display: flex; flex: 1; }
+
+    .pra-detail-header { padding: 16px 14px; }
+    .pra-detail-header-top { flex-direction: column; gap: 8px; }
+    .pra-detail-amount { font-size: 20px; }
+    .pra-detail-body { padding: 16px 14px 32px; }
+    .pra-id-grid { grid-template-columns: 1fr; }
+    .pra-tl-item { grid-template-columns: 56px 12px 1fr; gap: 8px; }
+    .pra-action-item { flex-direction: column; align-items: flex-start; }
+    .pra-audit-row { grid-template-columns: 52px 1fr; gap: 8px; }
+    .pra-funnel-row { grid-template-columns: 90px 1fr 32px; gap: 8px; }
+    .pra-outcome-actions { width: 100%; }
+    .pra-outcome-actions .pra-btn { flex: 1; }
+    .pra-detail-actions { flex-wrap: wrap; }
+    .pra-detail-actions .pra-btn { flex: 1; min-width: 120px; }
+
+    .pra-modal { width: calc(100vw - 24px); padding: 20px 16px; margin: 12px; }
+    .pra-modal-actions { flex-direction: column; }
+    .pra-modal-actions .pra-btn { width: 100%; }
+
+    .pra-agent-detail { grid-template-columns: 1fr; }
+    .pra-agent-detail .pra-card div[style*="grid-template-columns"] {
+      grid-template-columns: 1fr !important;
+    }
+    .pra-kv-row { grid-template-columns: 1fr; gap: 4px; }
+    .pra-example-grid { grid-template-columns: 1fr; }
+    .pra-activity-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .pra-kpi-grid { grid-template-columns: 1fr 1fr; }
+    .pra-stats > div:nth-child(3),
+    .pra-stats > div:nth-child(4) { display: none; }
   }
 
   .pra-id-grid {
@@ -2126,6 +2259,8 @@ export default function PaymentResolutionAgent() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [form, setForm] = useState({ amount: "", gatewayCode: GATEWAY_CODES[0], note: "" });
   const [formError, setFormError] = useState("");
+  const [navOpen, setNavOpen] = useState(false);
+  const [mobileShowDetail, setMobileShowDetail] = useState(false);
 
   const selected = transactions.find((t) => t.id === selectedId);
   const selectedResult = results[selectedId];
@@ -2181,6 +2316,8 @@ export default function PaymentResolutionAgent() {
     setFormError("");
     setShowAddForm(false);
     setView("workspace");
+    setMobileShowDetail(true);
+    setNavOpen(false);
   }
 
   async function runAgent(txn) {
@@ -2225,11 +2362,33 @@ export default function PaymentResolutionAgent() {
     setSelectedId(id);
     setOverriding(false);
     setOverrideText("");
+    setMobileShowDetail(true);
   }
 
   function openTxnFromDash(id) {
     selectTxn(id);
     setView("workspace");
+    setNavOpen(false);
+  }
+
+  function goToView(nextView) {
+    setView(nextView);
+    setNavOpen(false);
+    setMobileShowDetail(false);
+    if (nextView === "escalations") {
+      const first = transactions.find((t) => {
+        const r = results[t.id];
+        if (!r) return false;
+        if (r.status === "escalated") return true;
+        if (r.status === "resolved" && !r.humanDecision) return true;
+        return false;
+      });
+      if (first) {
+        setSelectedId(first.id);
+        setOverriding(false);
+        setOverrideText("");
+      }
+    }
   }
 
   const status = selectedResult?.status || "pending";
@@ -2246,15 +2405,23 @@ export default function PaymentResolutionAgent() {
   };
 
   let lastSection = null;
+  const workspaceMode = mobileShowDetail ? "pra-mobile-detail" : "pra-mobile-list";
 
   return (
     <div className="pra-root">
       <style>{STYLE}</style>
 
-      <aside className="pra-sidebar">
-        <div className="pra-sidebar-brand">
-          <div className="pra-sidebar-brand-name">Razorpay Ops AI</div>
-          <div className="pra-sidebar-brand-sub">Mock merchant payment console</div>
+      {navOpen && <button type="button" className="pra-sidebar-backdrop" aria-label="Close menu" onClick={() => setNavOpen(false)} />}
+
+      <aside className={`pra-sidebar ${navOpen ? "pra-sidebar-open" : ""}`}>
+        <div className="pra-sidebar-brand" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+          <div>
+            <div className="pra-sidebar-brand-name">Razorpay Ops AI</div>
+            <div className="pra-sidebar-brand-sub">Mock merchant payment console</div>
+          </div>
+          <button type="button" className="pra-sidebar-close" aria-label="Close menu" onClick={() => setNavOpen(false)}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 4l8 8M12 4l-8 8" strokeLinecap="round" /></svg>
+          </button>
         </div>
         <nav className="pra-sidebar-nav">
           {NAV_ITEMS.map((item) => {
@@ -2266,19 +2433,7 @@ export default function PaymentResolutionAgent() {
                 {showSection && <div className="pra-sidebar-section">{item.section}</div>}
                 <button
                   className={`pra-side-item ${view === item.id ? "pra-side-item-active" : ""}`}
-                  onClick={() => {
-                    setView(item.id);
-                    if (item.id === "escalations") {
-                      const first = transactions.find((t) => {
-                        const r = results[t.id];
-                        if (!r) return false;
-                        if (r.status === "escalated") return true;
-                        if (r.status === "resolved" && !r.humanDecision) return true;
-                        return false;
-                      });
-                      if (first) selectTxn(first.id);
-                    }
-                  }}
+                  onClick={() => goToView(item.id)}
                 >
                   <span className="pra-side-icon"><item.Icon /></span>
                   <span className="pra-side-label">{item.label}</span>
@@ -2299,9 +2454,19 @@ export default function PaymentResolutionAgent() {
 
       <div className="pra-main">
         <header className="pra-header">
-          <div>
-            <div className="pra-header-title">{page.title}</div>
-            <div className="pra-header-sub">{page.sub}</div>
+          <div className="pra-header-left">
+            <button type="button" className="pra-menu-btn" aria-label="Open menu" onClick={() => setNavOpen(true)}>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" strokeLinecap="round" /></svg>
+            </button>
+            {(view === "workspace" || view === "escalations") && mobileShowDetail && (
+              <button type="button" className="pra-back-btn" aria-label="Back to list" onClick={() => setMobileShowDetail(false)}>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M10 3.5 4.5 8 10 12.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+            )}
+            <div style={{ minWidth: 0 }}>
+              <div className="pra-header-title">{page.title}</div>
+              <div className="pra-header-sub">{page.sub}</div>
+            </div>
           </div>
           <div className="pra-stats">
             <div>
@@ -2326,7 +2491,7 @@ export default function PaymentResolutionAgent() {
         {view === "dashboard" && (
           <Dashboard
             metrics={metrics}
-            onOpenQueue={() => setView("workspace")}
+            onOpenQueue={() => { setView("workspace"); setMobileShowDetail(false); setNavOpen(false); }}
             onOpenTxn={openTxnFromDash}
           />
         )}
@@ -2334,7 +2499,7 @@ export default function PaymentResolutionAgent() {
         {view === "agents" && <AgentsView metrics={metrics} />}
 
         {(view === "workspace" || view === "escalations") && (
-        <div className="pra-body">
+        <div className={`pra-body ${workspaceMode}`}>
           <aside className="pra-queue">
             <div className="pra-queue-toolbar">
               {view === "workspace" ? (

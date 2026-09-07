@@ -1,16 +1,25 @@
-# React + Vite
+# Razorpay Ops AI (Mock)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Mock AI product demo for Razorpay merchant payment operations.
 
-Currently, two official plugins are available:
+Multi-agent pipeline: **Investigator → Resolver → Risk Reviewer → Human**, with dashboard, resolution queue, escalations, and agent roster.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Dashboard with ₹ at risk, funnel, and agent metrics
+- Queue with Razorpay-shaped IDs (`payment_id`, `order_id`, RRN, method)
+- Evidence timeline, action catalog, audit trail, customer message preview
+- Local simulated agents (no API key required)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Run
 
-## Expanding the Oxlint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Open the local URL Vite prints (default `http://127.0.0.1:5173`).
+
+## Note
+
+This is a **UI/product mock**, not a production Razorpay integration or live LLM system.
