@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const STYLE = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&display=swap');
@@ -1011,6 +1011,87 @@ const STYLE = `
   .pra-live-case-id { font-size: 15px; font-weight: 700; }
   .pra-live-case-meta { font-size: 12px; color: #8A8F98; margin-top: 4px; line-height: 1.45; }
   .pra-live-flow { display: flex; flex-direction: column; align-items: stretch; }
+  .pra-stepper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: #FFFFFF;
+    border: 1px solid #E4E6EB;
+    border-radius: 14px;
+    padding: 16px 10px 14px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .pra-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    position: relative;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0 4px;
+    min-width: 0;
+  }
+  .pra-step:disabled { cursor: default; opacity: 1; }
+  .pra-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #D8DADF;
+    background: #FFFFFF;
+    color: #8A8F98;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    transition: all 0.2s ease;
+  }
+  .pra-step-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #8A8F98;
+    line-height: 1.25;
+  }
+  .pra-step-sub {
+    font-size: 10px;
+    color: #B0B5BD;
+    margin-top: -4px;
+  }
+  .pra-step-done .pra-step-num {
+    background: #1E8A4C;
+    border-color: #1E8A4C;
+    color: #FFFFFF;
+  }
+  .pra-step-done .pra-step-label { color: #1A1D24; }
+  .pra-step-active .pra-step-num {
+    background: #3B5BDB;
+    border-color: #3B5BDB;
+    color: #FFFFFF;
+    box-shadow: 0 0 0 4px rgba(59, 91, 219, 0.15);
+  }
+  .pra-step-active .pra-step-label { color: #3B5BDB; }
+  .pra-step-active .pra-step-sub { color: #3B5BDB; }
+  .pra-step-line {
+    position: absolute;
+    top: 29px;
+    left: calc(12.5% + 14px);
+    right: calc(12.5% + 14px);
+    height: 2px;
+    background: #E4E6EB;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .pra-step-line-fill {
+    height: 100%;
+    background: #1E8A4C;
+    transition: width 0.35s ease;
+  }
   .pra-live-node {
     background: #FFFFFF;
     border: 1px solid #E4E6EB;
@@ -1154,6 +1235,11 @@ const STYLE = `
     .pra-live { padding: 16px 14px 32px; }
     .pra-live-hero h1 { font-size: 22px; }
     .pra-live-cta-row .pra-btn { flex: 1; min-width: 140px; }
+    .pra-stepper { padding: 14px 6px 12px; }
+    .pra-step-label { font-size: 10px; }
+    .pra-step-sub { display: none; }
+    .pra-step-num { width: 24px; height: 24px; font-size: 11px; }
+    .pra-step-line { top: 25px; left: calc(12.5% + 12px); right: calc(12.5% + 12px); }
   }
 `;
 
@@ -2109,9 +2195,17 @@ function phaseRank(phase) {
   return order[phase] || 0;
 }
 
+function deriveLiveStep(result, phase) {
+  if (!result) return 1;
+  if (result.status === "resolved" || result.status === "escalated" || phase === "human") return 4;
+  if (phase === "reviewer" || phase === "reviewer_done") return 3;
+  if (phase === "resolver" || phase === "resolver_done" || (result.proposalHistory || []).length) return 2;
+  if (phase === "investigator" || phase === "investigator_done" || result.investigation || result.status === "processing") return 1;
+  return 1;
+}
+
 function AgentLiveWorkflow({ txn, result, onApprove, onOverride, onRun, compact }) {
   const phase = result?.livePhase || (result?.investigation ? (result.status === "processing" ? "resolver" : "human") : result ? "investigator_done" : "idle");
-  const rank = phaseRank(result?.status === "processing" ? phase : (result ? "human" : "idle"));
   const checks = result?.liveChecks || evidenceChecksFor(txn).map((label) => ({ label, done: !!result?.investigation }));
   const invActive = phase === "investigator" || (!result?.investigation && result?.status === "processing");
   const invDone = !!result?.investigation;
@@ -2120,6 +2214,60 @@ function AgentLiveWorkflow({ txn, result, onApprove, onOverride, onRun, compact 
   const finalAction = result?.finalProposal?.action || result?.proposal?.action;
   const showHuman = result && (result.status === "resolved" || result.status === "escalated" || phase === "human");
   const statusKey = result?.status || "pending";
+  const liveStep = deriveLiveStep(result, phase);
+  const [viewStep, setViewStep] = useState(liveStep);
+
+  useEffect(() => {
+    setViewStep(liveStep);
+  }, [liveStep, txn.id, result?.status, result?.livePhase, (result?.reviews || []).length, (result?.proposalHistory || []).length]);
+
+  const step1Done = invDone;
+  const step2Done = proposals.length > 0 && (reviews.length > 0 || phase === "reviewer" || phase === "reviewer_done" || showHuman);
+  const latestProposal = proposals[proposals.length - 1];
+  const latestReview = reviews[reviews.length - 1];
+  const step3Done = latestReview?.approved || (showHuman && result?.status === "escalated" && reviews.length > 0) || (showHuman && latestReview);
+  const step3ReallyDone = showHuman || (latestReview && (latestReview.approved || reviews.length > 1));
+  const step4Done = !!result?.humanDecision;
+
+  const steps = [
+    {
+      n: 1,
+      label: "Fact finder",
+      sub: invActive ? "Checking…" : step1Done ? "Done" : "Waiting",
+      done: step1Done && liveStep > 1,
+      active: liveStep === 1 && statusKey === "processing",
+      unlocked: true,
+    },
+    {
+      n: 2,
+      label: "Action planner",
+      sub: liveStep === 2 && statusKey === "processing" ? "Deciding…" : step2Done || proposals.length ? "Done" : "Waiting",
+      done: (proposals.length > 0 && liveStep > 2) || (proposals.length > 0 && showHuman),
+      active: liveStep === 2 && statusKey === "processing",
+      unlocked: step1Done || liveStep >= 2,
+    },
+    {
+      n: 3,
+      label: "Safety check",
+      sub: liveStep === 3 && statusKey === "processing" ? "Checking…" : latestReview ? (latestReview.approved ? "Safe" : "Sent back") : "Waiting",
+      done: showHuman || (latestReview?.approved && liveStep > 3),
+      active: liveStep === 3 && statusKey === "processing",
+      unlocked: proposals.length > 0 || liveStep >= 3,
+    },
+    {
+      n: 4,
+      label: "Your decision",
+      sub: step4Done ? (result.humanDecision === "approved" ? "Approved" : "Edited") : showHuman ? "Needs you" : "Waiting",
+      done: step4Done,
+      active: showHuman && !step4Done,
+      unlocked: showHuman || liveStep >= 4,
+    },
+  ];
+
+  const linePct = step4Done ? 100 : Math.max(0, ((liveStep - 1) / 3) * 100);
+
+  const resolverActive = phase === "resolver";
+  const reviewerActive = phase === "reviewer";
 
   return (
     <div className="pra-live-flow">
@@ -2142,192 +2290,195 @@ function AgentLiveWorkflow({ txn, result, onApprove, onOverride, onRun, compact 
         </div>
       </div>
 
-      <div className={`pra-live-node ${invActive ? "pra-live-node-active" : invDone ? "pra-live-node-done" : ""}`}>
-        <div className="pra-live-node-head">
-          <div className="pra-live-node-title">
-            <span className="pra-dot pra-dot-investigator" style={{ width: 10, height: 10 }} />
-            1. Fact finder
-          </div>
-          <div className={`pra-live-node-status ${invActive ? "pra-live-node-status-active" : invDone ? "pra-live-node-status-done" : ""}`}>
-            {invActive ? "Checking…" : invDone ? "Done" : "Waiting"}
-          </div>
-        </div>
-        <div className="pra-live-node-body">
-          {(invActive || invDone) && (
-            <>
-              {invActive && (
-                <div className="pra-live-thinking">
-                  <div className="pra-spinner" />
-                  Looking through payment records…
-                </div>
-              )}
-              <div className="pra-check-list">
-                {checks.map((c) => (
-                  <div key={c.label} className={`pra-check ${c.done ? "pra-check-done" : ""}`}>
-                    <span className="pra-check-mark">{c.done ? "✓" : ""}</span>
-                    {friendlyCheck(c.label)}
-                  </div>
-                ))}
-              </div>
-              {invDone && result.investigation && (
-                <div className="pra-live-finding-box">
-                  <div className="pra-live-finding-label">What we think happened</div>
-                  <div className="pra-live-finding-main">{result.investigation.classification}</div>
-                  <div className="pra-live-conf">{confidenceWords(result.investigation.confidence)}</div>
-                  <div style={{ marginTop: 10 }}>
-                    {result.investigation.findings.map((f, i) => (
-                      <div key={i} className="pra-finding">{f}</div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-          {!invActive && !invDone && (
-            <div className="pra-muted" style={{ fontSize: 13 }}>Press “Start AI review” to begin.</div>
-          )}
-        </div>
+      <div className="pra-stepper" aria-label="AI review steps">
+        <div className="pra-step-line"><div className="pra-step-line-fill" style={{ width: `${linePct}%` }} /></div>
+        {steps.map((s) => (
+            <button
+              key={s.n}
+              type="button"
+              className={`pra-step ${s.done ? "pra-step-done" : ""} ${(s.active || viewStep === s.n) ? "pra-step-active" : ""}`}
+              disabled={!s.unlocked}
+              onClick={() => s.unlocked && setViewStep(s.n)}
+            >
+              <span className="pra-step-num">{s.done ? "✓" : s.n}</span>
+              <span className="pra-step-label">{s.label}</span>
+              <span className="pra-step-sub">{s.sub}</span>
+            </button>
+          ))}
       </div>
 
-      <div className="pra-live-arrow">↓</div>
-
-      {proposals.length === 0 && (phase === "resolver" || rank >= phaseRank("resolver")) && result?.status === "processing" && (
-        <>
-          <div className="pra-live-node pra-live-node-active">
-            <div className="pra-live-node-head">
-              <div className="pra-live-node-title">
-                <span className="pra-dot pra-dot-resolver" style={{ width: 10, height: 10 }} />
-                2. Action planner
-              </div>
-              <div className="pra-live-node-status pra-live-node-status-active">Deciding…</div>
+      {viewStep === 1 && (
+        <div className={`pra-live-node ${invActive ? "pra-live-node-active" : invDone ? "pra-live-node-done" : ""}`}>
+          <div className="pra-live-node-head">
+            <div className="pra-live-node-title">
+              <span className="pra-dot pra-dot-investigator" style={{ width: 10, height: 10 }} />
+              Fact finder
             </div>
-            <div className="pra-live-node-body">
+            <div className={`pra-live-node-status ${invActive ? "pra-live-node-status-active" : invDone ? "pra-live-node-status-done" : ""}`}>
+              {invActive ? "Checking…" : invDone ? "Done" : "Waiting"}
+            </div>
+          </div>
+          <div className="pra-live-node-body">
+            {(invActive || invDone) ? (
+              <>
+                {invActive && (
+                  <div className="pra-live-thinking">
+                    <div className="pra-spinner" />
+                    Looking through payment records…
+                  </div>
+                )}
+                <div className="pra-check-list">
+                  {checks.map((c) => (
+                    <div key={c.label} className={`pra-check ${c.done ? "pra-check-done" : ""}`}>
+                      <span className="pra-check-mark">{c.done ? "✓" : ""}</span>
+                      {friendlyCheck(c.label)}
+                    </div>
+                  ))}
+                </div>
+                {invDone && result.investigation && (
+                  <div className="pra-live-finding-box">
+                    <div className="pra-live-finding-label">What we think happened</div>
+                    <div className="pra-live-finding-main">{result.investigation.classification}</div>
+                    <div className="pra-live-conf">{confidenceWords(result.investigation.confidence)}</div>
+                    <div style={{ marginTop: 10 }}>
+                      {result.investigation.findings.map((f, i) => (
+                        <div key={i} className="pra-finding">{f}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="pra-muted" style={{ fontSize: 13 }}>Press “Start AI review” to begin.</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {viewStep === 2 && (
+        <div className={`pra-live-node ${resolverActive ? "pra-live-node-active" : proposals.length ? "pra-live-node-done" : ""}`}>
+          <div className="pra-live-node-head">
+            <div className="pra-live-node-title">
+              <span className="pra-dot pra-dot-resolver" style={{ width: 10, height: 10 }} />
+              Action planner{proposals.length > 1 ? ` · try ${proposals.length}` : ""}
+            </div>
+            <div className={`pra-live-node-status ${resolverActive ? "pra-live-node-status-active" : proposals.length ? "pra-live-node-status-done" : ""}`}>
+              {resolverActive ? "Deciding…" : proposals.length ? "Suggestion ready" : "Waiting"}
+            </div>
+          </div>
+          <div className="pra-live-node-body">
+            {resolverActive && !latestProposal && (
               <div className="pra-live-thinking">
                 <div className="pra-spinner" />
                 Choosing the best next step…
               </div>
-            </div>
-          </div>
-          <div className="pra-live-arrow">↓</div>
-        </>
-      )}
-
-      {proposals.map((p, i) => {
-        const review = reviews[i];
-        const isLatest = i === proposals.length - 1;
-        const resolverActive = isLatest && phase === "resolver";
-        const reviewerActive = isLatest && phase === "reviewer";
-        return (
-          <div key={i}>
-            <div className={`pra-live-node ${resolverActive ? "pra-live-node-active" : "pra-live-node-done"}`}>
-              <div className="pra-live-node-head">
-                <div className="pra-live-node-title">
-                  <span className="pra-dot pra-dot-resolver" style={{ width: 10, height: 10 }} />
-                  2. Action planner{i > 0 ? ` · try ${i + 1}` : ""}
-                </div>
-                <div className={`pra-live-node-status ${resolverActive ? "pra-live-node-status-active" : "pra-live-node-status-done"}`}>
-                  {resolverActive ? "Deciding…" : "Suggestion ready"}
-                </div>
-              </div>
-              <div className="pra-live-node-body">
-                <div className="pra-live-finding-label">Suggested next step</div>
-                <div className="pra-live-action">{p.action}</div>
-                <div className="pra-live-reason"><strong>Why:</strong> {p.rationale}</div>
-              </div>
-            </div>
-
-            <div className="pra-live-arrow">↓</div>
-
-            {(review || reviewerActive) && (
+            )}
+            {latestProposal ? (
               <>
-                <div className={`pra-live-node ${reviewerActive ? "pra-live-node-active" : "pra-live-node-done"}`}>
-                  <div className="pra-live-node-head">
-                    <div className="pra-live-node-title">
-                      <span className="pra-dot pra-dot-reviewer" style={{ width: 10, height: 10 }} />
-                      3. Safety check
-                    </div>
-                    <div className={`pra-live-node-status ${reviewerActive ? "pra-live-node-status-active" : "pra-live-node-status-done"}`}>
-                      {reviewerActive ? "Checking…" : review?.approved ? "Looks safe" : "Not safe yet"}
-                    </div>
-                  </div>
-                  <div className="pra-live-node-body">
-                    {reviewerActive && (
-                      <div className="pra-live-thinking">
-                        <div className="pra-spinner" />
-                        Making sure this won’t cause money or fraud issues…
-                      </div>
-                    )}
-                    {review && (
-                      <>
-                        <div className="pra-live-decision">
-                          <span className={review.approved ? "pra-approve-tag" : "pra-reject-tag"} style={{ marginBottom: 0 }}>
-                            {review.approved ? "OK TO CONTINUE" : "SEND BACK"}
-                          </span>
-                        </div>
-                        <div className="pra-live-reason" style={{ marginBottom: 10 }}><strong>Why:</strong> {review.reviewNote}</div>
-                        <div className="pra-live-finding-label">What it checked</div>
-                        <ul className="pra-live-evidence">
-                          {(result.investigation?.findings || []).slice(0, 3).map((f) => (
-                            <li key={f}>{f}</li>
-                          ))}
-                        </ul>
-                      </>
-                    )}
-                  </div>
-                </div>
-                {(!review?.approved || i < proposals.length - 1) && <div className="pra-live-arrow">↓</div>}
-                {review && !review.approved && i < proposals.length - 1 && (
-                  <div className="pra-muted" style={{ textAlign: "center", fontSize: 12, marginBottom: 8 }}>
-                    Sent back to the action planner to try a safer option
+                <div className="pra-live-finding-label">Suggested next step</div>
+                <div className="pra-live-action">{latestProposal.action}</div>
+                <div className="pra-live-reason"><strong>Why:</strong> {latestProposal.rationale}</div>
+                {proposals.length > 1 && (
+                  <div className="pra-muted" style={{ fontSize: 12, marginTop: 10 }}>
+                    Updated after safety check asked for a safer option.
                   </div>
                 )}
               </>
+            ) : !resolverActive && (
+              <div className="pra-muted" style={{ fontSize: 13 }}>Waiting for the fact finder to finish.</div>
             )}
           </div>
-        );
-      })}
+        </div>
+      )}
 
-      {showHuman && (
-        <>
-          {proposals.length > 0 && reviews[reviews.length - 1]?.approved && <div className="pra-live-arrow">↓</div>}
-          {result.status === "escalated" && proposals.length === 0 && <div className="pra-live-arrow">↓</div>}
-          <div className="pra-live-node pra-live-human pra-live-node-done">
-            <div className="pra-live-node-head">
-              <div className="pra-live-node-title">
-                <span style={{ fontSize: 14 }}>👤</span>
-                4. Your decision
-              </div>
-              <div className={`pra-live-node-status ${result.humanDecision ? "pra-live-node-status-done" : "pra-live-node-status-active"}`}>
-                {result.humanDecision ? (result.humanDecision === "approved" ? "Approved" : "Changed") : "Waiting for you"}
-              </div>
+      {viewStep === 3 && (
+        <div className={`pra-live-node ${reviewerActive ? "pra-live-node-active" : latestReview ? "pra-live-node-done" : ""}`}>
+          <div className="pra-live-node-head">
+            <div className="pra-live-node-title">
+              <span className="pra-dot pra-dot-reviewer" style={{ width: 10, height: 10 }} />
+              Safety check
             </div>
-            <div className="pra-live-node-body">
-              <div className="pra-live-action" style={{ fontSize: 16 }}>
-                {result.status === "escalated"
-                  ? (finalAction ? `Please review: ${finalAction}` : "Please review this case")
-                  : `Approve “${finalAction || "the suggestion"}”?`}
-              </div>
-              <div className="pra-msg-channel" style={{ marginTop: 8 }}>Message to customer</div>
-              <div className="pra-msg-preview">
-                {result.finalProposal?.draftMessage || result.proposal?.draftMessage || "No draft yet — handle this manually."}
-              </div>
-              {!result.humanDecision && onApprove && (
-                <div className="pra-live-cta-row">
-                  <button className="pra-btn pra-btn-approve" onClick={onApprove}>Looks good</button>
-                  {onOverride && <button className="pra-btn pra-btn-override" onClick={onOverride}>Edit message</button>}
-                </div>
-              )}
-              {result.humanDecision && (
-                <div className="pra-muted" style={{ fontSize: 12, marginTop: 12 }}>
-                  {result.humanDecision === "approved" ? "✓ You approved this" : "✎ You edited the message"}
-                </div>
-              )}
-              {result.escalateReason && (
-                <div className="pra-muted" style={{ fontSize: 12, marginTop: 10 }}>{result.escalateReason}</div>
-              )}
+            <div className={`pra-live-node-status ${reviewerActive ? "pra-live-node-status-active" : latestReview ? "pra-live-node-status-done" : ""}`}>
+              {reviewerActive ? "Checking…" : latestReview ? (latestReview.approved ? "Looks safe" : "Not safe yet") : "Waiting"}
             </div>
           </div>
-        </>
+          <div className="pra-live-node-body">
+            {reviewerActive && !latestReview && (
+              <div className="pra-live-thinking">
+                <div className="pra-spinner" />
+                Making sure this won’t cause money or fraud issues…
+              </div>
+            )}
+            {latestReview ? (
+              <>
+                <div className="pra-live-decision">
+                  <span className={latestReview.approved ? "pra-approve-tag" : "pra-reject-tag"} style={{ marginBottom: 0 }}>
+                    {latestReview.approved ? "OK TO CONTINUE" : "SEND BACK"}
+                  </span>
+                </div>
+                <div className="pra-live-reason" style={{ marginBottom: 10 }}><strong>Why:</strong> {latestReview.reviewNote}</div>
+                <div className="pra-live-finding-label">What it checked</div>
+                <ul className="pra-live-evidence">
+                  {(result.investigation?.findings || []).slice(0, 3).map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+                {reviews.length > 1 && (
+                  <div className="pra-muted" style={{ fontSize: 12, marginTop: 10 }}>
+                    Checked {reviews.length} times after earlier suggestions were sent back.
+                  </div>
+                )}
+              </>
+            ) : !reviewerActive && (
+              <div className="pra-muted" style={{ fontSize: 13 }}>Waiting for a suggested action.</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {viewStep === 4 && (
+        <div className="pra-live-node pra-live-human pra-live-node-done">
+          <div className="pra-live-node-head">
+            <div className="pra-live-node-title">
+              <span style={{ fontSize: 14 }}>👤</span>
+              Your decision
+            </div>
+            <div className={`pra-live-node-status ${result?.humanDecision ? "pra-live-node-status-done" : "pra-live-node-status-active"}`}>
+              {result?.humanDecision ? (result.humanDecision === "approved" ? "Approved" : "Changed") : showHuman ? "Waiting for you" : "Waiting"}
+            </div>
+          </div>
+          <div className="pra-live-node-body">
+            {showHuman ? (
+              <>
+                <div className="pra-live-action" style={{ fontSize: 16 }}>
+                  {result.status === "escalated"
+                    ? (finalAction ? `Please review: ${finalAction}` : "Please review this case")
+                    : `Approve “${finalAction || "the suggestion"}”?`}
+                </div>
+                <div className="pra-msg-channel" style={{ marginTop: 8 }}>Message to customer</div>
+                <div className="pra-msg-preview">
+                  {result.finalProposal?.draftMessage || result.proposal?.draftMessage || "No draft yet — handle this manually."}
+                </div>
+                {!result.humanDecision && onApprove && (
+                  <div className="pra-live-cta-row">
+                    <button className="pra-btn pra-btn-approve" onClick={onApprove}>Looks good</button>
+                    {onOverride && <button className="pra-btn pra-btn-override" onClick={onOverride}>Edit message</button>}
+                  </div>
+                )}
+                {result.humanDecision && (
+                  <div className="pra-muted" style={{ fontSize: 12, marginTop: 12 }}>
+                    {result.humanDecision === "approved" ? "✓ You approved this" : "✎ You edited the message"}
+                  </div>
+                )}
+                {result.escalateReason && (
+                  <div className="pra-muted" style={{ fontSize: 12, marginTop: 10 }}>{result.escalateReason}</div>
+                )}
+              </>
+            ) : (
+              <div className="pra-muted" style={{ fontSize: 13 }}>You’ll decide here after the safety check finishes.</div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -3194,9 +3345,9 @@ export default function PaymentResolutionAgent() {
 
               <div className="pra-detail-body">
                 <div className="pra-detail-inner" style={{ maxWidth: 720 }}>
-                  <div className="pra-section-title" style={{ marginTop: 0 }}>What the AI is doing</div>
+                  <div className="pra-section-title" style={{ marginTop: 0 }}>AI review</div>
                   <p className="pra-muted" style={{ fontSize: 13, marginBottom: 14, lineHeight: 1.45 }}>
-                    Four simple steps: find facts → suggest a fix → safety check → you approve.
+                    Follow the 4 steps below. The blue step is happening now.
                   </p>
 
                   {selectedResult?.status === "error" && (
