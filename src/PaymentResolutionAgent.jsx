@@ -1,0 +1,2691 @@
+import { useState } from "react";
+
+const STYLE = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  .pra-root {
+    background: #F4F5F7;
+    color: #1A1D24;
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+  }
+  .pra-mono { font-family: 'IBM Plex Mono', 'Courier New', monospace; }
+
+  /* App sidebar */
+  .pra-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: #15171C;
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .pra-sidebar-brand {
+    padding: 22px 18px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .pra-sidebar-brand-name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .pra-sidebar-brand-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 4px;
+    line-height: 1.35;
+  }
+  .pra-sidebar-nav {
+    flex: 1;
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+  }
+  .pra-sidebar-section {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.35);
+    padding: 12px 10px 6px;
+  }
+  .pra-side-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.62);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s ease, color 0.12s ease;
+  }
+  .pra-side-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: #FFFFFF;
+  }
+  .pra-side-item-active {
+    background: rgba(255,255,255,0.1);
+    color: #FFFFFF;
+  }
+  .pra-side-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.85;
+    flex-shrink: 0;
+  }
+  .pra-side-icon svg { width: 16px; height: 16px; }
+  .pra-side-label { flex: 1; }
+  .pra-side-count {
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.75);
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+  }
+  .pra-side-count-alert {
+    background: rgba(196, 57, 43, 0.35);
+    color: #FFB4AB;
+  }
+  .pra-sidebar-foot {
+    padding: 14px 16px 18px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.4;
+  }
+
+  .pra-main {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .pra-header {
+    flex-shrink: 0;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E4E6EB;
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .pra-header-title { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+  .pra-header-sub { font-size: 12px; color: #8A8F98; margin-top: 2px; }
+  .pra-stats { display: flex; gap: 32px; align-items: center; }
+  .pra-stat-value { font-size: 18px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+  .pra-stat-label { font-size: 11px; color: #8A8F98; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .pra-body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Left queue */
+  .pra-queue {
+    width: 340px;
+    flex-shrink: 0;
+    background: #FFFFFF;
+    border-right: 1px solid #E4E6EB;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .pra-queue-toolbar {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    border-bottom: 1px solid #E4E6EB;
+  }
+  .pra-queue-list {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  .pra-queue-list::-webkit-scrollbar { width: 6px; }
+  .pra-queue-list::-webkit-scrollbar-thumb { background: #D8DADF; border-radius: 3px; }
+
+  .pra-row {
+    cursor: pointer;
+    padding: 14px 16px;
+    border-bottom: 1px solid #F0F1F3;
+    border-left: 3px solid transparent;
+    transition: background 0.12s ease, border-color 0.12s ease;
+  }
+  .pra-row:hover { background: #F8F9FA; }
+  .pra-row-active {
+    background: #F0F4FF;
+    border-left-color: #3B5BDB;
+  }
+  .pra-row-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .pra-row-id { font-size: 12px; color: #5C6370; }
+  .pra-row-amount { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .pra-row-code { font-size: 11px; color: #8A8F98; margin-top: 3px; }
+
+  /* Right detail */
+  .pra-detail {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .pra-detail-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8A8F98;
+    font-size: 14px;
+  }
+  .pra-detail-header {
+    flex-shrink: 0;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E4E6EB;
+    padding: 20px 28px;
+  }
+  .pra-detail-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+  .pra-detail-id { font-size: 15px; font-weight: 600; }
+  .pra-detail-meta { display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+  .pra-detail-amount { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; white-space: nowrap; }
+  .pra-detail-note {
+    font-size: 13px;
+    color: #5C6370;
+    line-height: 1.55;
+    max-width: 720px;
+  }
+  .pra-detail-actions {
+    flex-shrink: 0;
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .pra-detail-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px 40px;
+    min-height: 0;
+  }
+  .pra-detail-body::-webkit-scrollbar { width: 6px; }
+  .pra-detail-body::-webkit-scrollbar-thumb { background: #D8DADF; border-radius: 3px; }
+  .pra-detail-inner { max-width: 680px; }
+
+  .pra-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+  .pra-badge-pending { background: #EEF0F3; color: #6B7280; }
+  .pra-badge-processing { background: #FFF4E0; color: #B5790C; }
+  .pra-badge-resolved { background: #E6F7ED; color: #1E8A4C; }
+  .pra-badge-escalated { background: #FCEDEC; color: #C4392B; }
+  .pra-badge-error { background: #FCEDEC; color: #C4392B; }
+
+  .pra-chip {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #F0F1F3;
+    color: #5C6370;
+    font-weight: 500;
+  }
+
+  .pra-btn {
+    border-radius: 6px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: opacity 0.12s ease, background 0.12s ease;
+    font-family: inherit;
+  }
+  .pra-btn:hover { opacity: 0.88; }
+  .pra-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pra-btn-primary { background: #1A1D24; color: #FFFFFF; }
+  .pra-btn-ghost { background: #FFFFFF; border-color: #D8DADF; color: #1A1D24; }
+  .pra-btn-ghost:hover { background: #F8F9FA; opacity: 1; }
+  .pra-btn-approve { background: #1E8A4C; color: #FFFFFF; }
+  .pra-btn-override { background: #FFFFFF; border: 1px solid #C6C6C6; color: #1A1D24; }
+  .pra-btn-sm { padding: 7px 12px; font-size: 12px; width: 100%; }
+
+  .pra-muted { color: #8A8F98; }
+  .pra-panel {
+    background: #FFFFFF;
+    border: 1px solid #E4E6EB;
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pra-agent-card {
+    border: 1px solid #E4E6EB;
+    border-radius: 10px;
+    margin-bottom: 0;
+    overflow: hidden;
+    background: #FFFFFF;
+  }
+  .pra-agent-head {
+    padding: 12px 16px;
+    background: #FAFBFC;
+    border-bottom: 1px solid #F0F1F3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pra-agent-name { font-size: 13px; font-weight: 600; }
+  .pra-agent-role { font-size: 11px; color: #8A8F98; margin-top: 1px; }
+  .pra-agent-body { padding: 14px 16px; }
+  .pra-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    display: inline-block; margin-right: 8px; flex-shrink: 0;
+  }
+  .pra-dot-investigator { background: #3B7DD8; }
+  .pra-dot-resolver { background: #B5790C; }
+  .pra-dot-reviewer { background: #7C4FD8; }
+  .pra-arrow {
+    text-align: center;
+    color: #C0C4CC;
+    font-size: 12px;
+    padding: 8px 0;
+    letter-spacing: 0.02em;
+  }
+  .pra-reject-tag {
+    display: inline-block;
+    background: #FCEDEC; color: #C4392B;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 3px 8px; border-radius: 4px; margin-bottom: 8px;
+  }
+  .pra-approve-tag {
+    display: inline-block;
+    background: #E6F7ED; color: #1E8A4C;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 3px 8px; border-radius: 4px; margin-bottom: 8px;
+  }
+
+  .pra-finding {
+    font-size: 12.5px;
+    color: #4A4F58;
+    margin-bottom: 6px;
+    line-height: 1.45;
+    padding-left: 10px;
+    position: relative;
+  }
+  .pra-finding::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 7px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #C0C4CC;
+  }
+
+  .pra-waiting {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 18px;
+    background: #FFFFFF;
+    border: 1px dashed #D8DADF;
+    border-radius: 10px;
+    color: #8A8F98;
+    font-size: 13px;
+  }
+  .pra-spinner {
+    width: 14px; height: 14px;
+    border: 2px solid #E4E6EB;
+    border-top-color: #3B5BDB;
+    border-radius: 50%;
+    animation: pra-spin 0.7s linear infinite;
+  }
+  @keyframes pra-spin { to { transform: rotate(360deg); } }
+
+  .pra-outcome-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .pra-outcome-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .pra-textarea {
+    background: #FFFFFF;
+    border: 1px solid #D8DADF;
+    color: #1A1D24;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 13px;
+    width: 100%;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.5;
+  }
+  .pra-textarea:focus, .pra-input:focus {
+    outline: none;
+    border-color: #3B5BDB;
+    box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12);
+  }
+  .pra-input {
+    background: #FFFFFF;
+    border: 1px solid #D8DADF;
+    color: #1A1D24;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 13px;
+    width: 100%;
+    font-family: inherit;
+  }
+  .pra-input::placeholder { color: #B0B0B0; }
+  .pra-field-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8A8F98;
+    margin-bottom: 5px;
+    display: block;
+    font-weight: 600;
+  }
+
+  .pra-overlay {
+    position: fixed; inset: 0;
+    background: rgba(20, 22, 28, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    backdrop-filter: blur(2px);
+  }
+  .pra-modal {
+    background: #FFFFFF;
+    border: 1px solid #E4E6EB;
+    border-radius: 12px;
+    padding: 24px;
+    width: 420px;
+    max-width: calc(100vw - 32px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.14);
+  }
+  .pra-modal-actions { display: flex; gap: 8px; }
+
+  /* Dashboard */
+  .pra-dash {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding: 28px 32px 48px;
+  }
+  .pra-dash::-webkit-scrollbar { width: 6px; }
+  .pra-dash::-webkit-scrollbar-thumb { background: #D8DADF; border-radius: 3px; }
+  .pra-dash-inner { max-width: 1120px; margin: 0 auto; }
+  .pra-dash-hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+  .pra-dash-hero h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0 0 6px;
+  }
+  .pra-dash-hero p {
+    margin: 0;
+    font-size: 14px;
+    color: #8A8F98;
+    line-height: 1.45;
+    max-width: 520px;
+  }
+  .pra-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .pra-kpi {
+    background: #FFFFFF;
+    border: 1px solid #E4E6EB;
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .pra-kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8A8F98;
+    margin-bottom: 10px;
+  }
+  .pra-kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .pra-kpi-hint {
+    font-size: 12px;
+    color: #8A8F98;
+    margin-top: 8px;
+  }
+  .pra-grid-2 {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .pra-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .pra-card {
+    background: #FFFFFF;
+    border: 1px solid #E4E6EB;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .pra-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .pra-card-sub {
+    font-size: 12px;
+    color: #8A8F98;
+    margin-bottom: 18px;
+  }
+  .pra-funnel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .pra-funnel-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 40px;
+    align-items: center;
+    gap: 12px;
+  }
+  .pra-funnel-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #5C6370;
+  }
+  .pra-funnel-track {
+    height: 28px;
+    background: #F4F5F7;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .pra-funnel-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #FFFFFF;
+    min-width: fit-content;
+    transition: width 0.4s ease;
+  }
+  .pra-funnel-count {
+    font-size: 13px;
+    font-weight: 700;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .pra-agent-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .pra-agent-metric {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px;
+    background: #FAFBFC;
+    border-radius: 8px;
+  }
+  .pra-agent-metric-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    margin-top: 5px; flex-shrink: 0;
+  }
+  .pra-agent-metric-name { font-size: 13px; font-weight: 600; }
+  .pra-agent-metric-desc { font-size: 11px; color: #8A8F98; margin-top: 2px; margin-bottom: 8px; }
+  .pra-agent-metric-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #5C6370;
+  }
+  .pra-agent-metric-stats strong { color: #1A1D24; font-weight: 700; }
+  .pra-bar-list { display: flex; flex-direction: column; gap: 12px; }
+  .pra-bar-row { display: flex; flex-direction: column; gap: 5px; }
+  .pra-bar-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+  .pra-bar-meta span:first-child { font-weight: 600; color: #5C6370; }
+  .pra-bar-meta span:last-child { color: #8A8F98; font-variant-numeric: tabular-nums; }
+  .pra-bar-track {
+    height: 8px;
+    background: #F0F1F3;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .pra-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: #3B5BDB;
+  }
+  .pra-activity {
+    display: flex;
+    flex-direction: column;
+  }
+  .pra-activity-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #F0F1F3;
+    cursor: pointer;
+    transition: background 0.1s ease;
+  }
+  .pra-activity-row:last-child { border-bottom: none; }
+  .pra-activity-row:hover { background: #FAFBFC; margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: 6px; }
+  .pra-activity-id { font-size: 12px; color: #5C6370; }
+  .pra-activity-action { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .pra-activity-class { font-size: 11px; color: #8A8F98; margin-top: 2px; }
+  .pra-empty-dash {
+    text-align: center;
+    padding: 40px 20px;
+    color: #8A8F98;
+    font-size: 13px;
+  }
+  @media (max-width: 960px) {
+    .pra-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .pra-grid-2, .pra-grid-3 { grid-template-columns: 1fr; }
+  }
+
+  .pra-id-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #FAFBFC;
+    border: 1px solid #E4E6EB;
+    border-radius: 8px;
+  }
+  .pra-id-item { min-width: 0; }
+  .pra-id-k {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #8A8F98;
+    margin-bottom: 2px;
+  }
+  .pra-id-v {
+    font-size: 12px;
+    color: #1A1D24;
+    word-break: break-all;
+  }
+  .pra-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #8A8F98;
+    margin: 22px 0 10px;
+  }
+  .pra-timeline { display: flex; flex-direction: column; gap: 0; }
+  .pra-tl-item {
+    display: grid;
+    grid-template-columns: 72px 14px 1fr;
+    gap: 10px;
+    position: relative;
+  }
+  .pra-tl-time {
+    font-size: 11px;
+    color: #8A8F98;
+    text-align: right;
+    padding-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .pra-tl-rail {
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+  .pra-tl-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #3B5BDB;
+    margin-top: 4px;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+  .pra-tl-dot-warn { background: #B5790C; }
+  .pra-tl-dot-bad { background: #C4392B; }
+  .pra-tl-dot-ok { background: #1E8A4C; }
+  .pra-tl-rail::after {
+    content: '';
+    position: absolute;
+    top: 12px; bottom: -4px;
+    width: 1px; background: #E4E6EB;
+  }
+  .pra-tl-item:last-child .pra-tl-rail::after { display: none; }
+  .pra-tl-body { padding-bottom: 14px; min-width: 0; }
+  .pra-tl-title { font-size: 13px; font-weight: 600; }
+  .pra-tl-desc { font-size: 12px; color: #5C6370; margin-top: 2px; line-height: 1.45; }
+  .pra-action-list { display: flex; flex-direction: column; gap: 8px; }
+  .pra-action-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #FFFFFF;
+    border: 1px solid #E4E6EB;
+    border-radius: 8px;
+  }
+  .pra-action-item-active {
+    border-color: #3B5BDB;
+    background: #F7F9FF;
+  }
+  .pra-action-name { font-size: 13px; font-weight: 600; }
+  .pra-action-desc { font-size: 12px; color: #8A8F98; margin-top: 3px; line-height: 1.4; }
+  .pra-action-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .pra-action-tag-rec { background: #E6F7ED; color: #1E8A4C; }
+  .pra-action-tag-alt { background: #EEF0F3; color: #6B7280; }
+  .pra-action-tag-risk { background: #FCEDEC; color: #C4392B; }
+  .pra-audit { display: flex; flex-direction: column; gap: 0; }
+  .pra-audit-row {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #F0F1F3;
+  }
+  .pra-audit-row:last-child { border-bottom: none; }
+  .pra-audit-ts { font-size: 11px; color: #8A8F98; padding-top: 2px; }
+  .pra-audit-who { font-size: 12px; font-weight: 600; }
+  .pra-audit-what { font-size: 12px; color: #5C6370; margin-top: 2px; line-height: 1.4; }
+  .pra-msg-preview {
+    background: #FAFBFC;
+    border: 1px solid #E4E6EB;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #2A2E36;
+  }
+  .pra-msg-channel {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #8A8F98;
+    margin-bottom: 8px;
+  }
+  .pra-tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .pra-mini-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #F0F1F3;
+    color: #5C6370;
+  }
+  .pra-mini-tag-blue { background: #E8F1FC; color: #2B6CB0; }
+  .pra-mini-tag-amber { background: #FFF4E0; color: #B5790C; }
+  .pra-mini-tag-purple { background: #F3EDFC; color: #7C4FD8; }
+  .pra-agent-detail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .pra-agent-detail .pra-card { margin: 0; }
+  .pra-kv { display: flex; flex-direction: column; gap: 10px; }
+  .pra-kv-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .pra-kv-k { color: #8A8F98; font-weight: 600; font-size: 12px; }
+  .pra-kv-v { color: #2A2E36; line-height: 1.45; }
+  .pra-rule-list { margin: 0; padding-left: 18px; color: #5C6370; font-size: 13px; line-height: 1.55; }
+  .pra-rule-list li { margin-bottom: 6px; }
+  .pra-example-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .pra-example {
+    background: #FAFBFC;
+    border: 1px solid #E4E6EB;
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .pra-example-code {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #8A8F98;
+    margin-bottom: 6px;
+  }
+  .pra-example-out { font-size: 13px; font-weight: 600; color: #1A1D24; margin-bottom: 4px; }
+  .pra-example-note { font-size: 12px; color: #5C6370; line-height: 1.4; }
+  @media (max-width: 960px) {
+    .pra-agent-detail, .pra-example-grid { grid-template-columns: 1fr; }
+  }
+`;
+
+const MERCHANTS = [
+  { id: "acc_Hk9mP2Qx", name: "UrbanKart Retail" },
+  { id: "acc_Lm4nR8Ty", name: "FreshBasket Groceries" },
+  { id: "acc_Zp1vC6Wd", name: "FitFuel Supplements" },
+];
+
+const METHODS = ["UPI", "Card", "Netbanking", "Wallet"];
+
+const RAZORPAY_ACTIONS = {
+  TIMEOUT_ERROR: [
+    { name: "Instant Refund", desc: "Refund full capture via Razorpay Refunds API", tag: "rec", tagLabel: "Recommended" },
+    { name: "Replay webhook", desc: "Re-send payment.failed / payment.captured to merchant", tag: "alt", tagLabel: "Alt" },
+    { name: "Check bank RRN", desc: "Confirm issuer debit before refunding", tag: "alt", tagLabel: "Alt" },
+  ],
+  SUCCESS: [
+    { name: "Reconcile & mark paid", desc: "Force-sync gateway SUCCESS to merchant order", tag: "rec", tagLabel: "Recommended" },
+    { name: "Replay payment.captured", desc: "Re-deliver webhook to merchant endpoint", tag: "alt", tagLabel: "Alt" },
+  ],
+  DUPLICATE_REF: [
+    { name: "Refund duplicate capture", desc: "Refund second payment_id only", tag: "rec", tagLabel: "Recommended" },
+    { name: "Link payments to order", desc: "Keep primary pay_*, void duplicate", tag: "alt", tagLabel: "Alt" },
+  ],
+  INSUFFICIENT_FUNDS: [
+    { name: "No action needed", desc: "Hard decline — no settlement movement", tag: "rec", tagLabel: "Recommended" },
+    { name: "Suggest retry", desc: "Optional customer nudge for alternate method", tag: "alt", tagLabel: "Alt" },
+  ],
+  RISK_HOLD: [
+    { name: "Route to Risk", desc: "Open Risk review with velocity evidence pack", tag: "risk", tagLabel: "Risk" },
+    { name: "Keep hold", desc: "Do not auto-release settlement", tag: "rec", tagLabel: "Recommended" },
+    { name: "Auto-release hold", desc: "Unsafe without human review", tag: "risk", tagLabel: "Blocked" },
+  ],
+  WEBHOOK_DELAY: [
+    { name: "Force-sync from Razorpay", desc: "Pull payment entity and update merchant", tag: "rec", tagLabel: "Recommended" },
+    { name: "Replay webhook", desc: "Re-POST payment.captured to merchant URL", tag: "alt", tagLabel: "Alt" },
+  ],
+  USER_CANCELLED: [
+    { name: "No action needed", desc: "Checkout abandoned before authorization", tag: "rec", tagLabel: "Recommended" },
+  ],
+  CURRENCY_MISMATCH: [
+    { name: "Escalate to Finance ops", desc: "FX delta needs ledger confirmation", tag: "rec", tagLabel: "Recommended" },
+    { name: "Partial adjustment refund", desc: "Refund FX difference after finance OK", tag: "alt", tagLabel: "Alt" },
+  ],
+  PARTIAL_REFUND: [
+    { name: "Escalate to ops", desc: "Reconcile gateway vs merchant refund totals", tag: "rec", tagLabel: "Recommended" },
+    { name: "Top-up remaining refund", desc: "Issue remaining balance after ledger match", tag: "alt", tagLabel: "Alt" },
+  ],
+};
+
+function parseAmount(amount) {
+  const n = Number(String(amount).replace(/[₹,\s]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function formatINR(n) {
+  return `₹${n.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+}
+
+function randomSuffix(len = 10) {
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let s = "";
+  for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+
+function buildEvidence(txn) {
+  const base = txn.ts || "14:00:00";
+  const [h, m, s] = base.split(":").map(Number);
+  const t = (offsetSec) => {
+    const total = h * 3600 + m * 60 + s + offsetSec;
+    const hh = String(Math.floor(total / 3600) % 24).padStart(2, "0");
+    const mm = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+    const ss = String(total % 60).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
+  };
+  const common = [
+    { time: t(-18), title: "Checkout created", desc: `order_id ${txn.orderId} · method ${txn.method}`, tone: "ok" },
+    { time: t(-12), title: "Payment attempted", desc: `payment_id ${txn.id} created on Razorpay`, tone: "ok" },
+  ];
+  const byCode = {
+    TIMEOUT_ERROR: [
+      { time: t(-8), title: "Issuer authorization pending", desc: `RRN ${txn.rrn} — bank ACK delayed`, tone: "warn" },
+      { time: t(-3), title: "Gateway TIMEOUT_ERROR", desc: "Razorpay marked payment failed; debit may still settle", tone: "bad" },
+      { time: t(0), title: "Customer complaint", desc: "Amount deducted in bank SMS, order shows failed", tone: "warn" },
+      { time: t(2), title: "Webhook gap", desc: "No payment.captured delivered to merchant endpoint", tone: "bad" },
+    ],
+    SUCCESS: [
+      { time: t(-6), title: "Gateway SUCCESS", desc: `payment.captured at Razorpay · RRN ${txn.rrn}`, tone: "ok" },
+      { time: t(-4), title: "Webhook delivery failed", desc: "Merchant endpoint 504 — payment.captured not received", tone: "bad" },
+      { time: t(0), title: "Merchant order unpaid", desc: "Order still awaiting payment despite gateway success", tone: "warn" },
+    ],
+    DUPLICATE_REF: [
+      { time: t(-40), title: "Primary capture", desc: `${txn.id} authorized successfully`, tone: "ok" },
+      { time: t(-5), title: "Duplicate attempt", desc: `Second payment ${txn.duplicatePaymentId} same card + order`, tone: "warn" },
+      { time: t(0), title: "DUPLICATE_REF flagged", desc: "Two charges within 40s on same order_id", tone: "bad" },
+    ],
+    INSUFFICIENT_FUNDS: [
+      { time: t(-4), title: "Issuer decline", desc: "INSUFFICIENT_FUNDS from issuing bank", tone: "bad" },
+      { time: t(0), title: "No settlement movement", desc: "No capture / no customer complaint", tone: "ok" },
+    ],
+    RISK_HOLD: [
+      { time: t(-180), title: "Velocity spike", desc: "5 payment attempts in 3 min from same device", tone: "bad" },
+      { time: t(-60), title: "Device fingerprint match", desc: `device ${txn.deviceId} · IP ${txn.ip}`, tone: "warn" },
+      { time: t(0), title: "RISK_HOLD applied", desc: "Settlement blocked pending Risk review", tone: "bad" },
+    ],
+    WEBHOOK_DELAY: [
+      { time: t(-660), title: "Gateway SUCCESS", desc: `Captured · RRN ${txn.rrn}`, tone: "ok" },
+      { time: t(-600), title: "Webhook queued", desc: "payment.captured enqueued for merchant", tone: "warn" },
+      { time: t(0), title: "Webhook still undelivered", desc: "11 min SLA breach — merchant system never notified", tone: "bad" },
+    ],
+    USER_CANCELLED: [
+      { time: t(-20), title: "UPI collect raised", desc: "Awaiting customer approval in UPI app", tone: "ok" },
+      { time: t(0), title: "USER_CANCELLED", desc: "Checkout closed before UPI approve", tone: "warn" },
+    ],
+    CURRENCY_MISMATCH: [
+      { time: t(-10), title: "Order quoted INR", desc: "Catalog amount locked at checkout", tone: "ok" },
+      { time: t(0), title: "Settlement FX mismatch", desc: "Gateway converted with stale FX rate", tone: "bad" },
+    ],
+    PARTIAL_REFUND: [
+      { time: t(-86400), title: "Original capture", desc: `Full amount ${txn.amount}`, tone: "ok" },
+      { time: t(-3600), title: "Partial refund posted", desc: `refund_id ${txn.refundId} — less than capture`, tone: "warn" },
+      { time: t(0), title: "Customer dispute", desc: "Claims full amount never returned", tone: "bad" },
+    ],
+  };
+  return [...common, ...(byCode[txn.gatewayCode] || [{ time: t(0), title: txn.gatewayCode, desc: txn.note, tone: "warn" }])];
+}
+
+function buildAuditFromResult(result) {
+  if (!result) return [];
+  const entries = [];
+  if (result.investigation) {
+    entries.push({
+      ts: "T+0s",
+      who: "Investigator",
+      what: `Classified as ${result.investigation.classification} (confidence ${result.investigation.confidence})`,
+    });
+  }
+  (result.proposalHistory || []).forEach((p, i) => {
+    entries.push({
+      ts: `T+${(i + 1) * 12}s`,
+      who: i === 0 ? "Resolver" : `Resolver · revision ${i + 1}`,
+      what: `Proposed “${p.action}” — ${p.rationale}`,
+    });
+    const review = result.reviews?.[i];
+    if (review) {
+      entries.push({
+        ts: `T+${(i + 1) * 12 + 6}s`,
+        who: "Risk Reviewer",
+        what: `${review.approved ? "Approved" : "Rejected"} — ${review.reviewNote}`,
+      });
+    }
+  });
+  if (result.finalStatus === "escalated" || result.status === "escalated") {
+    entries.push({
+      ts: "T+final",
+      who: "Pipeline",
+      what: result.escalateReason || "Escalated to human ops",
+    });
+  }
+  if (result.humanDecision) {
+    entries.push({
+      ts: "Human",
+      who: "Ops reviewer",
+      what: result.humanDecision === "approved" ? "Approved agent proposal" : "Overrode draft customer message",
+    });
+  }
+  return entries;
+}
+
+const INITIAL_TRANSACTIONS = [
+  {
+    id: "pay_9K2xLQ7mR3",
+    orderId: "order_N8a2KpLm9Q",
+    refundId: "—",
+    settlementId: "setl_pending",
+    merchantId: "acc_Hk9mP2Qx",
+    merchantName: "UrbanKart Retail",
+    method: "UPI",
+    rrn: "429918773421",
+    deviceId: "dv_7aK2",
+    ip: "103.48.22.14",
+    amount: "₹4,299.00",
+    amountValue: 4299,
+    gatewayCode: "TIMEOUT_ERROR",
+    note: "Customer says amount was deducted from bank but order still shows 'Payment Failed'.",
+    ts: "14:02:11",
+  },
+  {
+    id: "pay_7Hj4NpW2vX",
+    orderId: "order_M3b9RtYw2P",
+    refundId: "—",
+    settlementId: "setl_8Kp2Qa",
+    merchantId: "acc_Lm4nR8Ty",
+    merchantName: "FreshBasket Groceries",
+    method: "Card",
+    rrn: "551002338871",
+    deviceId: "dv_1cXm",
+    ip: "49.36.88.201",
+    amount: "₹1,150.00",
+    amountValue: 1150,
+    gatewayCode: "SUCCESS",
+    note: "Order shows unpaid even though gateway logged a success response 6 minutes ago.",
+    ts: "14:05:44",
+  },
+  {
+    id: "pay_3Rz8QmT9kL",
+    orderId: "order_P4c1UsZx7N",
+    refundId: "—",
+    settlementId: "setl_pending",
+    merchantId: "acc_Zp1vC6Wd",
+    merchantName: "FitFuel Supplements",
+    method: "Card",
+    rrn: "662113449902",
+    deviceId: "dv_9pQr",
+    ip: "122.15.44.90",
+    duplicatePaymentId: "pay_3Rz8QmT9kM",
+    amount: "₹899.00",
+    amountValue: 899,
+    gatewayCode: "DUPLICATE_REF",
+    note: "Two charges of the same amount within 40 seconds, same card, same order ID.",
+    ts: "14:09:02",
+  },
+  {
+    id: "pay_5Wc1YbF6pN",
+    orderId: "order_Q5d2VtAy8R",
+    refundId: "—",
+    settlementId: "—",
+    merchantId: "acc_Hk9mP2Qx",
+    merchantName: "UrbanKart Retail",
+    method: "Netbanking",
+    rrn: "—",
+    deviceId: "dv_4hJk",
+    ip: "27.59.101.33",
+    amount: "₹12,000.00",
+    amountValue: 12000,
+    gatewayCode: "INSUFFICIENT_FUNDS",
+    note: "No customer complaint filed. Standard decline code from issuing bank.",
+    ts: "14:11:37",
+  },
+  {
+    id: "pay_2Xa9JgH4sQ",
+    orderId: "order_R6e3WuBz9S",
+    refundId: "—",
+    settlementId: "setl_held",
+    merchantId: "acc_Lm4nR8Ty",
+    merchantName: "FreshBasket Groceries",
+    method: "UPI",
+    rrn: "773224550013",
+    deviceId: "dv_vel5",
+    ip: "103.21.244.12",
+    amount: "₹560.00",
+    amountValue: 560,
+    gatewayCode: "RISK_HOLD",
+    note: "Flagged by fraud engine for unusual velocity — 5 payment attempts in 3 minutes from same device.",
+    ts: "14:14:20",
+  },
+  {
+    id: "pay_8Uy6MdV3rK",
+    orderId: "order_S7f4XvCa1T",
+    refundId: "—",
+    settlementId: "setl_9Lm3Rb",
+    merchantId: "acc_Zp1vC6Wd",
+    merchantName: "FitFuel Supplements",
+    method: "UPI",
+    rrn: "884335661124",
+    deviceId: "dv_2nOp",
+    ip: "152.58.77.19",
+    amount: "₹2,340.00",
+    amountValue: 2340,
+    gatewayCode: "WEBHOOK_DELAY",
+    note: "Payment succeeded at gateway 11 minutes ago, merchant's system never received the status webhook.",
+    ts: "14:16:58",
+  },
+  {
+    id: "pay_4Bn2FcX7wZ",
+    orderId: "order_T8g5YwDb2U",
+    refundId: "—",
+    settlementId: "—",
+    merchantId: "acc_Hk9mP2Qx",
+    merchantName: "UrbanKart Retail",
+    method: "UPI",
+    rrn: "—",
+    deviceId: "dv_6sTu",
+    ip: "117.98.44.12",
+    amount: "₹75.00",
+    amountValue: 75,
+    gatewayCode: "USER_CANCELLED",
+    note: "Customer closed checkout page before completing UPI approval.",
+    ts: "14:19:15",
+  },
+].map((t) => ({ ...t, evidence: buildEvidence(t) }));
+
+/* Seeded agent runs so the dashboard has meaningful data on first load */
+const SEED_RESULTS = {
+  pay_9K2xLQ7mR3: {
+    status: "resolved",
+    investigation: {
+      findings: [
+        "Gateway returned TIMEOUT_ERROR while bank debit may have succeeded",
+        "No success webhook received by merchant within SLA",
+        "Customer complaint matches classic auth-timeout pattern",
+      ],
+      classification: "Bank-side timeout",
+      confidence: 0.86,
+    },
+    proposalHistory: [
+      { action: "Instant Refund", rationale: "Timeout with likely debit — refund via Razorpay Refunds API.", draftMessage: "We've initiated an Instant Refund for ₹4,299.00 to your original UPI handle." },
+    ],
+    proposal: { action: "Instant Refund", rationale: "Timeout with likely debit — refund via Razorpay Refunds API.", draftMessage: "We've initiated an Instant Refund for ₹4,299.00 to your original UPI handle." },
+    reviews: [{ attempt: 0, approved: true, reviewNote: "Evidence supports timeout failure; Instant Refund is low-risk." }],
+    finalProposal: { action: "Instant Refund", rationale: "Timeout with likely debit — refund via Razorpay Refunds API.", draftMessage: "We've initiated an Instant Refund for ₹4,299.00 to your original UPI handle." },
+    humanDecision: "approved",
+  },
+  pay_7Hj4NpW2vX: {
+    status: "resolved",
+    investigation: {
+      findings: [
+        "Gateway logged SUCCESS 6 minutes ago",
+        "Merchant order state still unpaid — webhook likely dropped",
+        "No duplicate charge indicators",
+      ],
+      classification: "Webhook delivery delay",
+      confidence: 0.91,
+    },
+    proposalHistory: [
+      { action: "Reconcile & mark paid", rationale: "Gateway success is authoritative; force-sync merchant order.", draftMessage: "Payment confirmed on Razorpay. Your FreshBasket order is now marked paid." },
+    ],
+    proposal: { action: "Reconcile & mark paid", rationale: "Gateway success is authoritative; force-sync merchant order.", draftMessage: "Payment confirmed on Razorpay. Your FreshBasket order is now marked paid." },
+    reviews: [{ attempt: 0, approved: true, reviewNote: "Clear SUCCESS at gateway; reconciliation is correct." }],
+    finalProposal: { action: "Reconcile & mark paid", rationale: "Gateway success is authoritative; force-sync merchant order.", draftMessage: "Payment confirmed on Razorpay. Your FreshBasket order is now marked paid." },
+    humanDecision: "approved",
+  },
+  pay_3Rz8QmT9kL: {
+    status: "resolved",
+    investigation: {
+      findings: [
+        "Two identical charges within 40 seconds",
+        "Same card fingerprint and order ID",
+        "First charge authorized; second likely client retry",
+      ],
+      classification: "Duplicate charge",
+      confidence: 0.88,
+    },
+    proposalHistory: [
+      { action: "Refund duplicate capture", rationale: "Refund the second payment_id only.", draftMessage: "Duplicate charge detected — refunding ₹899.00." },
+      { action: "Refund duplicate capture", rationale: "Confirm primary pay_* then refund only duplicate capture.", draftMessage: "We've refunded the duplicate ₹899.00 charge. Original payment stands." },
+    ],
+    proposal: { action: "Refund duplicate capture", rationale: "Confirm primary pay_* then refund only duplicate capture.", draftMessage: "We've refunded the duplicate ₹899.00 charge. Original payment stands." },
+    reviews: [
+      { attempt: 0, approved: false, reviewNote: "Verify which payment_id is primary for the order before refunding." },
+      { attempt: 1, approved: true, reviewNote: "Revised proposal correctly targets the duplicate payment_id only." },
+    ],
+    finalProposal: { action: "Refund duplicate capture", rationale: "Confirm primary pay_* then refund only duplicate capture.", draftMessage: "We've refunded the duplicate ₹899.00 charge. Original payment stands." },
+    humanDecision: "approved",
+  },
+  pay_5Wc1YbF6pN: {
+    status: "resolved",
+    investigation: {
+      findings: [
+        "Issuer returned INSUFFICIENT_FUNDS",
+        "No customer complaint on file",
+        "Single attempt, no velocity anomalies",
+      ],
+      classification: "Hard decline — NSF",
+      confidence: 0.94,
+    },
+    proposalHistory: [
+      { action: "No action needed", rationale: "Standard issuer decline; nothing to remediate.", draftMessage: "Payment declined by bank due to insufficient funds." },
+    ],
+    proposal: { action: "No action needed", rationale: "Standard issuer decline; nothing to remediate.", draftMessage: "Payment declined by bank due to insufficient funds." },
+    reviews: [{ attempt: 0, approved: true, reviewNote: "Correct — NSF declines require no refund or escalation." }],
+    finalProposal: { action: "No action needed", rationale: "Standard issuer decline; nothing to remediate.", draftMessage: "Payment declined by bank due to insufficient funds." },
+    humanDecision: "approved",
+  },
+  pay_2Xa9JgH4sQ: {
+    status: "escalated",
+    escalateReason: "Risk Reviewer did not approve after revisions",
+    investigation: {
+      findings: [
+        "Fraud engine flagged velocity: 5 attempts in 3 minutes",
+        "Same device fingerprint across attempts",
+        "RISK_HOLD still active — funds not settled",
+      ],
+      classification: "Fraud / velocity hold",
+      confidence: 0.79,
+    },
+    proposalHistory: [
+      { action: "Auto-release hold", rationale: "Customer may be retrying legitimately.", draftMessage: "We've released the payment hold." },
+      { action: "Route to Risk", rationale: "Velocity pattern warrants Razorpay Risk review before release.", draftMessage: "Payment under fraud review — team will update within 24h." },
+      { action: "Keep hold + Risk review", rationale: "Do not auto-release; attach evidence pack for Risk.", draftMessage: "Your payment is under security review." },
+    ],
+    proposal: { action: "Keep hold + Risk review", rationale: "Do not auto-release; attach evidence pack for Risk.", draftMessage: "Your payment is under security review." },
+    reviews: [
+      { attempt: 0, approved: false, reviewNote: "Auto-releasing a velocity hold is high fraud risk." },
+      { attempt: 1, approved: false, reviewNote: "Escalation is fine but draft message over-promises SLA." },
+      { attempt: 2, approved: false, reviewNote: "Still needs named Risk owner before customer message." },
+    ],
+    finalProposal: { action: "Keep hold + Risk review", rationale: "Do not auto-release; attach evidence pack for Risk.", draftMessage: "Your payment is under security review." },
+  },
+};
+
+Object.keys(SEED_RESULTS).forEach((id) => {
+  SEED_RESULTS[id].audit = buildAuditFromResult(SEED_RESULTS[id]);
+});
+
+const GATEWAY_CODES = [
+  "TIMEOUT_ERROR", "SUCCESS", "DUPLICATE_REF", "INSUFFICIENT_FUNDS",
+  "RISK_HOLD", "WEBHOOK_DELAY", "USER_CANCELLED", "CURRENCY_MISMATCH", "PARTIAL_REFUND",
+];
+
+const NOTE_TEMPLATES = {
+  TIMEOUT_ERROR: "Customer says amount was deducted from bank but order still shows 'Payment Failed'.",
+  SUCCESS: "Order shows unpaid even though gateway logged a success response a few minutes ago.",
+  DUPLICATE_REF: "Two charges of the same amount within under a minute, same card, same order ID.",
+  INSUFFICIENT_FUNDS: "No customer complaint filed. Standard decline code from issuing bank.",
+  RISK_HOLD: "Flagged by fraud engine for unusual velocity — several payment attempts in a short window from the same device.",
+  WEBHOOK_DELAY: "Payment succeeded at gateway some minutes ago, merchant's system never received the status webhook.",
+  USER_CANCELLED: "Customer closed checkout page before completing UPI approval.",
+  CURRENCY_MISMATCH: "Order was placed in one currency but the gateway processed the charge using the wrong conversion.",
+  PARTIAL_REFUND: "Refund shows as processed but customer says they never received the full amount back.",
+};
+
+function randomTxnId() {
+  const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let s = "";
+  for (let i = 0; i < 11; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return `pay_${s}`;
+}
+
+function nowTs() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+const LOCAL_PLAYBOOK = {
+  TIMEOUT_ERROR: {
+    investigation: {
+      findings: [
+        "Gateway returned TIMEOUT_ERROR while bank debit may have succeeded",
+        "No success webhook received by merchant within SLA",
+        "Customer complaint matches classic auth-timeout pattern",
+      ],
+      classification: "Bank-side timeout",
+      confidence: 0.86,
+    },
+    proposals: [
+      { action: "Instant Refund", rationale: "Timeout with likely debit — refund via Razorpay Refunds API.", draftMessage: "We've initiated an Instant Refund for {amount} to your original payment method." },
+    ],
+    reviews: [{ approved: true, reviewNote: "Evidence supports timeout failure; refund is appropriate." }],
+  },
+  SUCCESS: {
+    investigation: {
+      findings: [
+        "Gateway logged SUCCESS",
+        "Merchant order state still unpaid — webhook likely dropped or delayed",
+        "No duplicate charge indicators on this payment ID",
+      ],
+      classification: "Webhook delivery delay",
+      confidence: 0.91,
+    },
+    proposals: [
+      { action: "Reconcile & mark paid", rationale: "Gateway success is authoritative; sync merchant state.", draftMessage: "Payment confirmed. Your order is now marked as paid." },
+    ],
+    reviews: [{ approved: true, reviewNote: "Clear SUCCESS at gateway; reconciliation is the correct action." }],
+  },
+  DUPLICATE_REF: {
+    investigation: {
+      findings: [
+        "Two identical charges within a short window",
+        "Same card fingerprint and order ID",
+        "First charge authorized; second likely a client retry",
+      ],
+      classification: "Duplicate charge",
+      confidence: 0.88,
+    },
+    proposals: [
+      { action: "Refund duplicate capture", rationale: "Refund the second payment_id only.", draftMessage: "Duplicate charge detected — refunding {amount}." },
+      { action: "Refund duplicate capture", rationale: "Confirm primary pay_* then refund only the duplicate capture.", draftMessage: "We've refunded the duplicate charge. Original payment stands." },
+    ],
+    reviews: [
+      { approved: false, reviewNote: "Need to verify which authorization is the primary order payment before refunding." },
+      { approved: true, reviewNote: "Revised proposal correctly targets the duplicate auth only." },
+    ],
+  },
+  INSUFFICIENT_FUNDS: {
+    investigation: {
+      findings: [
+        "Issuer returned INSUFFICIENT_FUNDS",
+        "No customer complaint on file",
+        "Single attempt with no velocity anomalies",
+      ],
+      classification: "Hard decline — NSF",
+      confidence: 0.94,
+    },
+    proposals: [
+      { action: "No action needed", rationale: "Standard issuer decline; nothing to remediate on merchant side.", draftMessage: "Payment was declined by the bank due to insufficient funds." },
+    ],
+    reviews: [{ approved: true, reviewNote: "Correct — NSF declines require no refund or escalation." }],
+  },
+  RISK_HOLD: {
+    investigation: {
+      findings: [
+        "Fraud engine flagged unusual payment velocity",
+        "Same device fingerprint across rapid attempts",
+        "RISK_HOLD still active — funds not settled",
+      ],
+      classification: "Fraud / velocity hold",
+      confidence: 0.79,
+    },
+    proposals: [
+      { action: "Auto-release hold", rationale: "Customer may be retrying a legitimate checkout.", draftMessage: "We've released the payment hold on your order." },
+      { action: "Route to Risk", rationale: "Velocity pattern warrants Razorpay Risk review before release.", draftMessage: "Your payment is under security review. Our team will update you shortly." },
+      { action: "Keep hold + Risk review", rationale: "Do not auto-release; attach evidence pack for Risk.", draftMessage: "Your payment is under security review." },
+    ],
+    reviews: [
+      { approved: false, reviewNote: "Auto-releasing a velocity hold is high fraud risk." },
+      { approved: false, reviewNote: "Escalation is better, but customer message should not promise a fixed SLA." },
+      { approved: false, reviewNote: "Still needs named human ownership before any customer message." },
+    ],
+  },
+  WEBHOOK_DELAY: {
+    investigation: {
+      findings: [
+        "Gateway shows success from several minutes ago",
+        "Merchant never received the status webhook",
+        "No conflicting decline or refund on the same payment",
+      ],
+      classification: "Webhook delivery delay",
+      confidence: 0.9,
+    },
+    proposals: [
+      { action: "Force-sync from Razorpay", rationale: "Pull payment entity and update merchant order status.", draftMessage: "We've confirmed your payment on Razorpay and updated your order status." },
+    ],
+    reviews: [{ approved: true, reviewNote: "Force-sync from gateway is low risk and corrects the merchant lag." }],
+  },
+  USER_CANCELLED: {
+    investigation: {
+      findings: [
+        "Checkout abandoned before UPI / OTP approval",
+        "No bank debit associated with this attempt",
+        "USER_CANCELLED is a clean decline, not a settlement issue",
+      ],
+      classification: "User-abandoned checkout",
+      confidence: 0.96,
+    },
+    proposals: [
+      { action: "No action needed", rationale: "User cancelled before authorization; no funds moved.", draftMessage: "Your checkout was cancelled before payment completed. No amount was charged." },
+    ],
+    reviews: [{ approved: true, reviewNote: "Correct — cancelled checkouts need no refund." }],
+  },
+  CURRENCY_MISMATCH: {
+    investigation: {
+      findings: [
+        "Order currency and gateway settlement currency differ",
+        "Conversion applied does not match catalog FX at order time",
+        "Customer may have been over/under charged relative to quote",
+      ],
+      classification: "Currency / FX mismatch",
+      confidence: 0.72,
+    },
+    proposals: [
+      { action: "Partial adjustment refund", rationale: "Refund the FX delta to match the quoted amount.", draftMessage: "We've adjusted your charge to match the quoted currency amount." },
+      { action: "Escalate to Finance ops", rationale: "FX mismatch needs ledger review before any customer-facing refund.", draftMessage: "We're reviewing a currency discrepancy on your payment with our finance team." },
+    ],
+    reviews: [
+      { approved: false, reviewNote: "Partial refund without finance confirmation risks ledger imbalance." },
+      { approved: true, reviewNote: "Escalating to finance before refund is the safer path." },
+    ],
+  },
+  PARTIAL_REFUND: {
+    investigation: {
+      findings: [
+        "Refund record exists but amount is less than original capture",
+        "Customer claims full amount was never returned",
+        "Gateway and merchant refund totals disagree",
+      ],
+      classification: "Partial refund dispute",
+      confidence: 0.68,
+    },
+    proposals: [
+      { action: "Top-up remaining refund", rationale: "Issue the remaining balance to match original capture.", draftMessage: "We've processed the remaining refund balance to your original payment method." },
+      { action: "Escalate to ops", rationale: "Confirm gateway vs merchant refund ledger before topping up.", draftMessage: "We're reviewing your refund totals and will confirm the remaining balance shortly." },
+    ],
+    reviews: [
+      { approved: false, reviewNote: "Do not top up until gateway and merchant ledgers are reconciled." },
+      { approved: true, reviewNote: "Ops escalation before further refund is correct." },
+    ],
+  },
+};
+
+function playbookFor(txn) {
+  return LOCAL_PLAYBOOK[txn.gatewayCode] || {
+    investigation: {
+      findings: [
+        `Gateway code ${txn.gatewayCode} observed`,
+        "Limited structured evidence available in the queue note",
+        "Classification is provisional pending richer logs",
+      ],
+      classification: "Needs manual classification",
+      confidence: 0.55,
+    },
+    proposals: [
+      { action: "Escalate to ops", rationale: "Insufficient structured evidence for an automated action.", draftMessage: "We're reviewing this payment manually and will update you soon." },
+    ],
+    reviews: [{ approved: true, reviewNote: "Low-evidence cases should go to humans." }],
+  };
+}
+
+function fillAmount(text, amount) {
+  return (text || "").replaceAll("{amount}", amount);
+}
+
+/** Local multi-agent simulation — the browser cannot call Anthropic directly (no API key + CORS). */
+async function runPipeline(txn, onStage) {
+  const book = playbookFor(txn);
+  let snapshot = { status: "processing", reviews: [], proposalHistory: [] };
+
+  const emit = (patch) => {
+    snapshot = { ...snapshot, ...patch };
+    if (patch.finalStatus) snapshot.status = patch.finalStatus;
+    snapshot.audit = buildAuditFromResult(snapshot);
+    onStage({ ...patch, audit: snapshot.audit });
+  };
+
+  await sleep(700);
+  const investigation = { ...book.investigation, findings: [...book.investigation.findings] };
+  emit({ investigation });
+
+  if (investigation.confidence < LOW_CONFIDENCE_THRESHOLD) {
+    await sleep(400);
+    emit({ finalStatus: "escalated", escalateReason: "Investigator confidence too low to proceed" });
+    return;
+  }
+
+  let proposal = null;
+  let reviews = [];
+  let proposalHistory = [];
+  const maxAttempts = Math.min(MAX_REVISIONS, Math.max(book.proposals.length, book.reviews.length) - 1);
+
+  for (let attempt = 0; attempt <= maxAttempts; attempt++) {
+    await sleep(650);
+    const raw = book.proposals[Math.min(attempt, book.proposals.length - 1)];
+    proposal = {
+      action: raw.action,
+      rationale: raw.rationale,
+      draftMessage: fillAmount(raw.draftMessage, txn.amount),
+    };
+    proposalHistory = [...proposalHistory, proposal];
+    emit({ proposal, proposalHistory, attempt });
+
+    await sleep(550);
+    const reviewSrc = book.reviews[Math.min(attempt, book.reviews.length - 1)];
+    const review = { attempt, approved: reviewSrc.approved, reviewNote: reviewSrc.reviewNote };
+    reviews = [...reviews, review];
+    emit({ reviews });
+
+    if (review.approved) {
+      emit({ finalStatus: "resolved", finalProposal: proposal });
+      return;
+    }
+  }
+
+  emit({ finalStatus: "escalated", escalateReason: "Risk Reviewer did not approve after revisions", finalProposal: proposal });
+}
+
+const MAX_REVISIONS = 2;
+const LOW_CONFIDENCE_THRESHOLD = 0.6;
+
+function computeMetrics(transactions, results) {
+  const pending = transactions.filter((t) => !results[t.id] || results[t.id].status === "pending").length;
+  const processing = transactions.filter((t) => results[t.id]?.status === "processing").length;
+  const resolved = transactions.filter((t) => results[t.id]?.status === "resolved").length;
+  const escalated = transactions.filter((t) => results[t.id]?.status === "escalated").length;
+  const processed = resolved + escalated;
+  const allResults = Object.values(results);
+  const finished = allResults.filter((r) => r.status === "resolved" || r.status === "escalated");
+  const revisionCount = finished.reduce((sum, r) => sum + Math.max((r.reviews?.length || 1) - 1, 0), 0);
+  const avgConfidence = finished.length
+    ? finished.reduce((s, r) => s + (r.investigation?.confidence || 0), 0) / finished.length
+    : null;
+  const firstPassApprovals = finished.filter((r) => r.reviews?.length === 1 && r.reviews[0]?.approved).length;
+  const firstPassRate = finished.length ? Math.round((firstPassApprovals / finished.length) * 100) : null;
+  const reviewerRejects = finished.reduce((sum, r) => sum + (r.reviews || []).filter((x) => !x.approved).length, 0);
+  const reviewerApproves = finished.reduce((sum, r) => sum + (r.reviews || []).filter((x) => x.approved).length, 0);
+  const autoResolved = finished.filter((r) => r.status === "resolved" && r.humanDecision === "approved").length;
+  const humanNeeded = finished.filter((r) => r.status === "escalated" || r.humanDecision === "overridden" || !r.humanDecision).length;
+
+  const classCounts = {};
+  finished.forEach((r) => {
+    const c = r.investigation?.classification || "Unknown";
+    classCounts[c] = (classCounts[c] || 0) + 1;
+  });
+  const classifications = Object.entries(classCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+
+  const actionCounts = {};
+  finished.forEach((r) => {
+    const a = r.finalProposal?.action || r.proposal?.action || (r.status === "escalated" ? "Escalated" : "Unknown");
+    actionCounts[a] = (actionCounts[a] || 0) + 1;
+  });
+  const actions = Object.entries(actionCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+  const activity = transactions
+    .filter((t) => results[t.id] && (results[t.id].status === "resolved" || results[t.id].status === "escalated" || results[t.id].status === "processing"))
+    .map((t) => ({
+      id: t.id,
+      amount: t.amount,
+      status: results[t.id].status,
+      action: results[t.id].finalProposal?.action || results[t.id].proposal?.action || "In progress",
+      classification: results[t.id].investigation?.classification || "—",
+      confidence: results[t.id].investigation?.confidence,
+      revisions: Math.max((results[t.id].reviews?.length || 1) - 1, 0),
+    }));
+
+  const atRiskTxns = transactions.filter((t) => {
+    const r = results[t.id];
+    if (!r) return ["TIMEOUT_ERROR", "DUPLICATE_REF", "RISK_HOLD", "WEBHOOK_DELAY", "PARTIAL_REFUND", "CURRENCY_MISMATCH"].includes(t.gatewayCode);
+    if (r.status === "escalated") return true;
+    if (r.status === "resolved" && !r.humanDecision) return true;
+    if (r.status === "processing" || r.status === "pending") return ["TIMEOUT_ERROR", "DUPLICATE_REF", "RISK_HOLD", "WEBHOOK_DELAY", "PARTIAL_REFUND", "CURRENCY_MISMATCH"].includes(t.gatewayCode);
+    return false;
+  });
+  const atRiskAmount = atRiskTxns.reduce((s, t) => s + (t.amountValue || parseAmount(t.amount)), 0);
+  const recoveredAmount = transactions
+    .filter((t) => results[t.id]?.status === "resolved" && results[t.id]?.humanDecision === "approved")
+    .filter((t) => /refund|reconcile|force-sync|instant/i.test(results[t.id]?.finalProposal?.action || ""))
+    .reduce((s, t) => s + (t.amountValue || parseAmount(t.amount)), 0);
+
+  return {
+    pending, processing, resolved, escalated, processed, revisionCount,
+    avgConfidence, firstPassRate, reviewerRejects, reviewerApproves,
+    autoResolved, humanNeeded, classifications, actions, activity,
+    queueSize: transactions.length,
+    investigated: finished.filter((r) => r.investigation).length + processing,
+    resolvedByResolver: finished.filter((r) => r.proposalHistory?.length).length,
+    reviewed: finished.filter((r) => (r.reviews?.length || 0) > 0).length,
+    atRiskAmount,
+    atRiskCount: atRiskTxns.length,
+    recoveredAmount,
+  };
+}
+
+function Dashboard({ metrics, onOpenQueue, onOpenTxn }) {
+  const maxClass = Math.max(1, ...metrics.classifications.map(([, n]) => n));
+  const maxAction = Math.max(1, ...metrics.actions.map(([, n]) => n));
+  const funnelMax = Math.max(1, metrics.queueSize);
+
+  return (
+    <div className="pra-dash">
+      <div className="pra-dash-inner">
+        <div className="pra-dash-hero">
+          <div>
+            <h1>Razorpay payment ops</h1>
+            <p>
+              Mock AI console for merchant payment exceptions — Instant Refunds, webhook replay,
+              Risk holds, and human escalation with full evidence and audit.
+            </p>
+          </div>
+          <button className="pra-btn pra-btn-primary" onClick={onOpenQueue}>
+            Open resolution queue →
+          </button>
+        </div>
+
+        <div className="pra-kpi-grid">
+          <div className="pra-kpi">
+            <div className="pra-kpi-label">₹ at risk</div>
+            <div className="pra-kpi-value" style={{ color: "#C4392B" }}>{formatINR(metrics.atRiskAmount)}</div>
+            <div className="pra-kpi-hint">{metrics.atRiskCount} open exception{metrics.atRiskCount === 1 ? "" : "s"}</div>
+          </div>
+          <div className="pra-kpi">
+            <div className="pra-kpi-label">Auto-resolved</div>
+            <div className="pra-kpi-value" style={{ color: "#1E8A4C" }}>{metrics.resolved}</div>
+            <div className="pra-kpi-hint">{formatINR(metrics.recoveredAmount)} cleared by agents</div>
+          </div>
+          <div className="pra-kpi">
+            <div className="pra-kpi-label">Escalated</div>
+            <div className="pra-kpi-value" style={{ color: "#C4392B" }}>{metrics.escalated}</div>
+            <div className="pra-kpi-hint">{metrics.revisionCount} revision loops fired</div>
+          </div>
+          <div className="pra-kpi">
+            <div className="pra-kpi-label">Avg confidence</div>
+            <div className="pra-kpi-value">{metrics.avgConfidence != null ? metrics.avgConfidence.toFixed(2) : "—"}</div>
+            <div className="pra-kpi-hint">
+              {metrics.firstPassRate != null ? `${metrics.firstPassRate}% first-pass approve` : "No finished runs yet"}
+            </div>
+          </div>
+        </div>
+
+        <div className="pra-grid-2">
+          <div className="pra-card">
+            <div className="pra-card-title">Pipeline funnel</div>
+            <div className="pra-card-sub">How many cases reach each agent stage</div>
+            <div className="pra-funnel">
+              {[
+                { label: "In queue", count: metrics.queueSize, color: "#8A8F98" },
+                { label: "Investigated", count: metrics.investigated, color: "#3B7DD8" },
+                { label: "Resolved by agent", count: metrics.resolvedByResolver, color: "#B5790C" },
+                { label: "Risk reviewed", count: metrics.reviewed, color: "#7C4FD8" },
+                { label: "Closed", count: metrics.resolved, color: "#1E8A4C" },
+                { label: "Escalated", count: metrics.escalated, color: "#C4392B" },
+              ].map((row) => (
+                <div className="pra-funnel-row" key={row.label}>
+                  <div className="pra-funnel-label">{row.label}</div>
+                  <div className="pra-funnel-track">
+                    <div
+                      className="pra-funnel-fill"
+                      style={{
+                        width: `${Math.max(8, (row.count / funnelMax) * 100)}%`,
+                        background: row.color,
+                      }}
+                    />
+                  </div>
+                  <div className="pra-funnel-count">{row.count}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pra-card">
+            <div className="pra-card-title">Agent performance</div>
+            <div className="pra-card-sub">What each role is doing in the loop</div>
+            <div className="pra-agent-grid">
+              <div className="pra-agent-metric">
+                <div className="pra-agent-metric-dot" style={{ background: "#3B7DD8" }} />
+                <div>
+                  <div className="pra-agent-metric-name">Investigator</div>
+                  <div className="pra-agent-metric-desc">Facts only · confidence gate at {LOW_CONFIDENCE_THRESHOLD}</div>
+                  <div className="pra-agent-metric-stats">
+                    <span><strong>{metrics.investigated}</strong> runs</span>
+                    <span>avg conf <strong>{metrics.avgConfidence != null ? metrics.avgConfidence.toFixed(2) : "—"}</strong></span>
+                  </div>
+                </div>
+              </div>
+              <div className="pra-agent-metric">
+                <div className="pra-agent-metric-dot" style={{ background: "#B5790C" }} />
+                <div>
+                  <div className="pra-agent-metric-name">Resolver</div>
+                  <div className="pra-agent-metric-desc">Proposes action · revises on rejection</div>
+                  <div className="pra-agent-metric-stats">
+                    <span><strong>{metrics.resolvedByResolver}</strong> proposals</span>
+                    <span><strong>{metrics.revisionCount}</strong> revisions</span>
+                  </div>
+                </div>
+              </div>
+              <div className="pra-agent-metric">
+                <div className="pra-agent-metric-dot" style={{ background: "#7C4FD8" }} />
+                <div>
+                  <div className="pra-agent-metric-name">Risk Reviewer</div>
+                  <div className="pra-agent-metric-desc">Skeptical gate before human</div>
+                  <div className="pra-agent-metric-stats">
+                    <span><strong>{metrics.reviewerApproves}</strong> approved</span>
+                    <span><strong>{metrics.reviewerRejects}</strong> rejected</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="pra-grid-3">
+          <div className="pra-card">
+            <div className="pra-card-title">Root-cause mix</div>
+            <div className="pra-card-sub">Investigator classifications</div>
+            {metrics.classifications.length === 0 ? (
+              <div className="pra-empty-dash">No finished investigations yet</div>
+            ) : (
+              <div className="pra-bar-list">
+                {metrics.classifications.map(([label, count]) => (
+                  <div className="pra-bar-row" key={label}>
+                    <div className="pra-bar-meta">
+                      <span>{label}</span>
+                      <span>{count}</span>
+                    </div>
+                    <div className="pra-bar-track">
+                      <div className="pra-bar-fill" style={{ width: `${(count / maxClass) * 100}%`, background: "#3B7DD8" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="pra-card">
+            <div className="pra-card-title">Actions proposed</div>
+            <div className="pra-card-sub">Final Resolver outcomes</div>
+            {metrics.actions.length === 0 ? (
+              <div className="pra-empty-dash">No proposals yet</div>
+            ) : (
+              <div className="pra-bar-list">
+                {metrics.actions.map(([label, count]) => (
+                  <div className="pra-bar-row" key={label}>
+                    <div className="pra-bar-meta">
+                      <span>{label}</span>
+                      <span>{count}</span>
+                    </div>
+                    <div className="pra-bar-track">
+                      <div className="pra-bar-fill" style={{ width: `${(count / maxAction) * 100}%`, background: "#B5790C" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="pra-card">
+            <div className="pra-card-title">Human handoff</div>
+            <div className="pra-card-sub">Where agents stop and people start</div>
+            <div className="pra-bar-list" style={{ marginTop: 4 }}>
+              <div className="pra-kpi" style={{ padding: "14px 0", border: "none" }}>
+                <div className="pra-kpi-label">Needs human</div>
+                <div className="pra-kpi-value" style={{ fontSize: 24 }}>{metrics.humanNeeded}</div>
+              </div>
+              <div className="pra-kpi" style={{ padding: "14px 0", border: "none" }}>
+                <div className="pra-kpi-label">Fully auto-closed</div>
+                <div className="pra-kpi-value" style={{ fontSize: 24, color: "#1E8A4C" }}>{metrics.autoResolved}</div>
+              </div>
+              <div className="pra-kpi" style={{ padding: "14px 0", border: "none" }}>
+                <div className="pra-kpi-label">First-pass rate</div>
+                <div className="pra-kpi-value" style={{ fontSize: 24, color: "#7C4FD8" }}>
+                  {metrics.firstPassRate != null ? `${metrics.firstPassRate}%` : "—"}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="pra-card">
+          <div className="pra-card-title">Recent agent activity</div>
+          <div className="pra-card-sub">Click a row to open it in the resolution workspace</div>
+          {metrics.activity.length === 0 ? (
+            <div className="pra-empty-dash">Run the pipeline on a transaction to see activity here</div>
+          ) : (
+            <div className="pra-activity">
+              {metrics.activity.map((row) => (
+                <div className="pra-activity-row" key={row.id} onClick={() => onOpenTxn(row.id)}>
+                  <div>
+                    <div className="pra-mono pra-activity-id">{row.id}</div>
+                    <div className="pra-activity-action">{row.action}</div>
+                    <div className="pra-activity-class">{row.classification}{row.confidence != null ? ` · conf ${row.confidence}` : ""}</div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>{row.amount}</div>
+                    <div className="pra-muted" style={{ fontSize: 11, marginTop: 2 }}>
+                      {row.revisions > 0 ? `${row.revisions} revision${row.revisions > 1 ? "s" : ""}` : "first pass"}
+                    </div>
+                  </div>
+                  <span className={`pra-badge pra-badge-${row.status}`}>{row.status}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const AGENT_PROFILES = [
+  {
+    id: "investigator",
+    name: "Investigator",
+    color: "#3B7DD8",
+    dot: "pra-dot-investigator",
+    tagClass: "pra-mini-tag-blue",
+    role: "Fact finder",
+    mandate: "Establish what actually happened to a Razorpay payment using evidence only. Never propose refunds or customer messages.",
+    inputs: ["payment_id / order_id", "gateway code", "webhook timeline", "bank RRN", "device / IP velocity", "merchant complaint note"],
+    outputs: ["findings[]", "classification label", "confidence 0–1"],
+    tools: ["Payments API", "Orders API", "Webhook logs", "Bank RRN lookup", "Risk velocity signals"],
+    must: [
+      "Cite evidence from the timeline (RRN, webhook, device)",
+      "Lower confidence when signals conflict",
+      "Route straight to human if confidence < 0.60",
+    ],
+    mustNot: [
+      "Propose Instant Refund or any customer action",
+      "Invent missing gateway fields",
+      "Approve or reject a resolution",
+    ],
+    examples: [
+      { code: "TIMEOUT_ERROR", out: "Bank-side timeout", note: "Debit possible, no payment.captured" },
+      { code: "SUCCESS", out: "Webhook delivery delay", note: "Gateway ok, merchant unpaid" },
+      { code: "RISK_HOLD", out: "Fraud / velocity hold", note: "5 attempts / 3 min, same device" },
+    ],
+  },
+  {
+    id: "resolver",
+    name: "Resolver",
+    color: "#B5790C",
+    dot: "pra-dot-resolver",
+    tagClass: "pra-mini-tag-amber",
+    role: "Action proposer",
+    mandate: "Given Investigator findings, pick a concrete Razorpay ops action and draft the customer / merchant message.",
+    inputs: ["Investigator findings", "classification + confidence", "prior Risk rejection note (on revision)"],
+    outputs: ["action label", "rationale", "draft SMS/email message"],
+    tools: ["Refunds API catalog", "Webhook replay", "Force-sync payment", "Risk routing", "Finance escalation"],
+    must: [
+      "Map to a real Razorpay action (Instant Refund, Replay webhook, Route to Risk…)",
+      "Revise meaningfully when Risk Reviewer rejects",
+      "Keep customer copy plain and non-committal on SLA unless safe",
+    ],
+    mustNot: [
+      "Ignore a Risk rejection and resubmit the same action",
+      "Auto-release RISK_HOLD without human path",
+      "Refund NSF / USER_CANCELLED cases",
+    ],
+    examples: [
+      { code: "TIMEOUT_ERROR", out: "Instant Refund", note: "Clear likely debit + failed order" },
+      { code: "DUPLICATE_REF", out: "Refund duplicate capture", note: "Second payment_id only" },
+      { code: "WEBHOOK_DELAY", out: "Force-sync from Razorpay", note: "Pull entity → mark order paid" },
+    ],
+  },
+  {
+    id: "reviewer",
+    name: "Risk Reviewer",
+    color: "#7C4FD8",
+    dot: "pra-dot-reviewer",
+    tagClass: "pra-mini-tag-purple",
+    role: "Skeptical gate",
+    mandate: "Stress-test the Resolver proposal for financial, fraud, and evidence mismatch risk before a human or customer sees it.",
+    inputs: ["findings + classification", "proposed action", "draft message"],
+    outputs: ["approved true/false", "reviewNote"],
+    tools: ["Risk policy checks", "Refund exposure rules", "Fraud velocity thresholds", "Ledger consistency checks"],
+    must: [
+      "Reject only for real risk (not style nits)",
+      "Explain the specific objection in one sentence",
+      "Allow up to 2 revision loops, then escalate",
+    ],
+    mustNot: [
+      "Approve auto-release on RISK_HOLD",
+      "Approve refunds when primary payment_id is ambiguous",
+      "Force a bad proposal through after retries",
+    ],
+    examples: [
+      { code: "RISK_HOLD", out: "Reject → escalate", note: "Blocks auto-release after 3 loops" },
+      { code: "DUPLICATE_REF", out: "Reject once", note: "Forces primary payment_id check" },
+      { code: "INSUFFICIENT_FUNDS", out: "Approve", note: "No action is correct" },
+    ],
+  },
+];
+
+function AgentsView({ metrics }) {
+  const live = {
+    investigator: {
+      runs: metrics.investigated,
+      detail: `avg confidence ${metrics.avgConfidence != null ? metrics.avgConfidence.toFixed(2) : "—"}`,
+    },
+    resolver: {
+      runs: metrics.resolvedByResolver,
+      detail: `${metrics.revisionCount} revision loop${metrics.revisionCount === 1 ? "" : "s"}`,
+    },
+    reviewer: {
+      runs: metrics.reviewerApproves + metrics.reviewerRejects,
+      detail: `${metrics.reviewerApproves} approved · ${metrics.reviewerRejects} rejected`,
+    },
+  };
+
+  return (
+    <div className="pra-dash">
+      <div className="pra-dash-inner">
+        <div className="pra-dash-hero">
+          <div>
+            <h1>Agent roster</h1>
+            <p>
+              Three specialized Razorpay ops agents. Investigator finds facts, Resolver picks an action,
+              Risk Reviewer stress-tests it — then a human approves, overrides, or owns the escalation.
+            </p>
+          </div>
+        </div>
+
+        <div className="pra-kpi-grid" style={{ marginBottom: 14 }}>
+          <div className="pra-kpi">
+            <div className="pra-kpi-label">Investigations</div>
+            <div className="pra-kpi-value" style={{ color: "#3B7DD8" }}>{metrics.investigated}</div>
+            <div className="pra-kpi-hint">confidence gate at {LOW_CONFIDENCE_THRESHOLD}</div>
+          </div>
+          <div className="pra-kpi">
+            <div className="pra-kpi-label">Proposals</div>
+            <div className="pra-kpi-value" style={{ color: "#B5790C" }}>{metrics.resolvedByResolver}</div>
+            <div className="pra-kpi-hint">{metrics.revisionCount} revisions fired</div>
+          </div>
+          <div className="pra-kpi">
+            <div className="pra-kpi-label">Risk decisions</div>
+            <div className="pra-kpi-value" style={{ color: "#7C4FD8" }}>{metrics.reviewerApproves + metrics.reviewerRejects}</div>
+            <div className="pra-kpi-hint">{metrics.firstPassRate != null ? `${metrics.firstPassRate}% first-pass` : "—"}</div>
+          </div>
+          <div className="pra-kpi">
+            <div className="pra-kpi-label">Human handoffs</div>
+            <div className="pra-kpi-value">{metrics.humanNeeded}</div>
+            <div className="pra-kpi-hint">{metrics.escalated} escalated · {metrics.autoResolved} auto-closed</div>
+          </div>
+        </div>
+
+        {AGENT_PROFILES.map((agent) => {
+          const stats = live[agent.id];
+          return (
+            <div key={agent.id} style={{ marginBottom: 14 }}>
+              <div className="pra-card" style={{ marginBottom: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      <span className={`pra-dot ${agent.dot}`} style={{ width: 10, height: 10 }} />
+                      <div className="pra-card-title" style={{ margin: 0, fontSize: 16 }}>{agent.name}</div>
+                      <span className={`pra-mini-tag ${agent.tagClass}`}>{agent.role}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: "#5C6370", lineHeight: 1.5, maxWidth: 720 }}>{agent.mandate}</div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div className="pra-kpi-value" style={{ fontSize: 22, color: agent.color }}>{stats.runs}</div>
+                    <div className="pra-kpi-hint">{stats.detail}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pra-agent-detail" style={{ marginTop: 0 }}>
+                <div className="pra-card" style={{ borderTopLeftRadius: 0 }}>
+                  <div className="pra-card-title">Inputs → outputs</div>
+                  <div className="pra-kv" style={{ marginTop: 12 }}>
+                    <div className="pra-kv-row">
+                      <div className="pra-kv-k">Reads</div>
+                      <div className="pra-kv-v">
+                        <div className="pra-tag-row" style={{ marginTop: 0 }}>
+                          {agent.inputs.map((x) => <span key={x} className="pra-mini-tag">{x}</span>)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pra-kv-row">
+                      <div className="pra-kv-k">Writes</div>
+                      <div className="pra-kv-v">
+                        <div className="pra-tag-row" style={{ marginTop: 0 }}>
+                          {agent.outputs.map((x) => <span key={x} className={`pra-mini-tag ${agent.tagClass}`}>{x}</span>)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pra-kv-row">
+                      <div className="pra-kv-k">Tools</div>
+                      <div className="pra-kv-v">
+                        <div className="pra-tag-row" style={{ marginTop: 0 }}>
+                          {agent.tools.map((x) => <span key={x} className="pra-mini-tag">{x}</span>)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pra-card" style={{ borderTopRightRadius: 0 }}>
+                  <div className="pra-card-title">Guardrails</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 12 }}>
+                    <div>
+                      <div className="pra-field-label" style={{ color: "#1E8A4C" }}>Must</div>
+                      <ul className="pra-rule-list">
+                        {agent.must.map((x) => <li key={x}>{x}</li>)}
+                      </ul>
+                    </div>
+                    <div>
+                      <div className="pra-field-label" style={{ color: "#C4392B" }}>Must not</div>
+                      <ul className="pra-rule-list">
+                        {agent.mustNot.map((x) => <li key={x}>{x}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pra-card" style={{ marginTop: -14, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+                <div className="pra-card-title">Example judgments</div>
+                <div className="pra-card-sub">How this agent typically behaves on common Razorpay codes</div>
+                <div className="pra-example-grid">
+                  {agent.examples.map((ex) => (
+                    <div className="pra-example" key={ex.code}>
+                      <div className="pra-mono pra-example-code">{ex.code}</div>
+                      <div className="pra-example-out">{ex.out}</div>
+                      <div className="pra-example-note">{ex.note}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        <div className="pra-grid-2">
+          <div className="pra-card">
+            <div className="pra-card-title">Pipeline contract</div>
+            <div className="pra-card-sub">Strict handoff order — no skipping unless confidence is too low</div>
+            <div className="pra-funnel" style={{ maxWidth: 520 }}>
+              {[
+                { label: "Investigator", note: "facts + confidence score", color: "#3B7DD8" },
+                { label: "Resolver", note: "Razorpay action + draft message", color: "#B5790C" },
+                { label: "Risk Reviewer", note: "approve or reject with reason", color: "#7C4FD8" },
+                { label: "Human ops", note: "approve / override / own escalation", color: "#1A1D24" },
+              ].map((step, i, arr) => (
+                <div key={step.label}>
+                  <div className="pra-agent-metric">
+                    <div className="pra-agent-metric-dot" style={{ background: step.color }} />
+                    <div>
+                      <div className="pra-agent-metric-name">{step.label}</div>
+                      <div className="pra-agent-metric-desc" style={{ marginBottom: 0 }}>{step.note}</div>
+                    </div>
+                  </div>
+                  {i < arr.length - 1 && <div className="pra-arrow">↓</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pra-card">
+            <div className="pra-card-title">Operating rules</div>
+            <div className="pra-card-sub">Mock policy for this Razorpay demo</div>
+            <ul className="pra-rule-list" style={{ marginTop: 8 }}>
+              <li>Confidence below <strong>{LOW_CONFIDENCE_THRESHOLD}</strong> skips Resolver and goes straight to Escalations.</li>
+              <li>Risk Reviewer may reject up to <strong>2</strong> times; third failure escalates to human.</li>
+              <li>RISK_HOLD never auto-releases — always ends in Risk / human ownership.</li>
+              <li>Duplicate charges must name the secondary <span className="pra-mono">payment_id</span> before refund.</li>
+              <li>Customer messages are drafts only until a human clicks Approve or Override.</li>
+              <li>Every stage is written to the case audit trail for merchant ops review.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IconDash() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1" />
+      <rect x="9" y="1.5" width="5.5" height="5.5" rx="1" />
+      <rect x="1.5" y="9" width="5.5" height="5.5" rx="1" />
+      <rect x="9" y="9" width="5.5" height="5.5" rx="1" />
+    </svg>
+  );
+}
+function IconQueue() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M2.5 4h11M2.5 8h11M2.5 12h7" strokeLinecap="round" />
+    </svg>
+  );
+}
+function IconEscalate() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M8 2.5v7M5.5 6.5 8 9l2.5-2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3 12.5h10" strokeLinecap="round" />
+    </svg>
+  );
+}
+function IconAgents() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="8" cy="5" r="2.25" />
+      <path d="M3.5 13c.6-2.2 2.2-3.25 4.5-3.25S11.9 10.8 12.5 13" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+const NAV_ITEMS = [
+  { id: "dashboard", label: "Dashboard", section: "Overview", Icon: IconDash },
+  { id: "workspace", label: "Queue", section: "Operations", Icon: IconQueue },
+  { id: "escalations", label: "Escalations", section: "Operations", Icon: IconEscalate },
+  { id: "agents", label: "Agents", section: "System", Icon: IconAgents },
+];
+
+const PAGE_META = {
+  dashboard: { title: "Dashboard", sub: "₹ at risk, agent funnel, and Razorpay exception health" },
+  workspace: { title: "Resolution queue", sub: "payment_id exceptions across merchants" },
+  escalations: { title: "Escalations", sub: "Cases needing human / Risk review" },
+  agents: { title: "Agents", sub: "Investigator, Resolver, and Risk Reviewer roles" },
+};
+
+export default function PaymentResolutionAgent() {
+  const [view, setView] = useState("dashboard");
+  const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
+  const [results, setResults] = useState(SEED_RESULTS);
+  const [selectedId, setSelectedId] = useState(INITIAL_TRANSACTIONS[0].id);
+  const [overrideText, setOverrideText] = useState("");
+  const [overriding, setOverriding] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [form, setForm] = useState({ amount: "", gatewayCode: GATEWAY_CODES[0], note: "" });
+  const [formError, setFormError] = useState("");
+
+  const selected = transactions.find((t) => t.id === selectedId);
+  const selectedResult = results[selectedId];
+  const metrics = computeMetrics(transactions, results);
+
+  // Escalations view: show escalated + resolved awaiting human decision
+  const displayedTxns = view === "escalations"
+    ? transactions.filter((t) => {
+        const r = results[t.id];
+        if (!r) return false;
+        if (r.status === "escalated") return true;
+        if ((r.status === "resolved" || r.status === "escalated") && !r.humanDecision) return true;
+        return false;
+      })
+    : transactions;
+
+  function addTransaction() {
+    if (!form.amount.trim()) {
+      setFormError("Amount is required.");
+      return;
+    }
+    const amountValue = parseAmount(form.amount);
+    if (!amountValue) {
+      setFormError("Enter a valid amount.");
+      return;
+    }
+    const displayAmount = `₹${amountValue.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const merchant = MERCHANTS[Math.floor(Math.random() * MERCHANTS.length)];
+    const method = METHODS[Math.floor(Math.random() * METHODS.length)];
+    const note = NOTE_TEMPLATES[form.gatewayCode] || "No further context provided.";
+    const txnBase = {
+      id: randomTxnId(),
+      orderId: `order_${randomSuffix(10)}`,
+      refundId: form.gatewayCode === "PARTIAL_REFUND" ? `rfnd_${randomSuffix(8)}` : "—",
+      settlementId: ["INSUFFICIENT_FUNDS", "USER_CANCELLED"].includes(form.gatewayCode) ? "—" : `setl_${randomSuffix(6)}`,
+      merchantId: merchant.id,
+      merchantName: merchant.name,
+      method,
+      rrn: ["INSUFFICIENT_FUNDS", "USER_CANCELLED"].includes(form.gatewayCode) ? "—" : String(Math.floor(100000000000 + Math.random() * 899999999999)),
+      deviceId: `dv_${randomSuffix(4)}`,
+      ip: `${Math.floor(Math.random() * 200) + 1}.${Math.floor(Math.random() * 200)}.${Math.floor(Math.random() * 200)}.${Math.floor(Math.random() * 200)}`,
+      amount: displayAmount,
+      amountValue,
+      gatewayCode: form.gatewayCode,
+      note,
+      ts: nowTs(),
+      duplicatePaymentId: form.gatewayCode === "DUPLICATE_REF" ? randomTxnId() : undefined,
+    };
+    const txn = { ...txnBase, evidence: buildEvidence(txnBase) };
+    setTransactions((t) => [txn, ...t]);
+    setSelectedId(txn.id);
+    setForm({ amount: "", gatewayCode: GATEWAY_CODES[0], note: "" });
+    setFormError("");
+    setShowAddForm(false);
+    setView("workspace");
+  }
+
+  async function runAgent(txn) {
+    setResults((r) => ({ ...r, [txn.id]: { status: "processing", reviews: [] } }));
+    try {
+      await runPipeline(txn, (patch) => {
+        setResults((r) => {
+          const current = r[txn.id] || { status: "processing", reviews: [] };
+          const merged = { ...current, ...patch };
+          if (patch.finalStatus) merged.status = patch.finalStatus;
+          else if (current.status !== "escalated" && current.status !== "resolved") merged.status = "processing";
+          return { ...r, [txn.id]: merged };
+        });
+      });
+    } catch (e) {
+      setResults((r) => ({ ...r, [txn.id]: { status: "error", error: "Pipeline call failed. Try again." } }));
+    }
+  }
+
+  function approve() {
+    setResults((r) => {
+      const next = { ...r[selectedId], humanDecision: "approved" };
+      next.audit = buildAuditFromResult(next);
+      return { ...r, [selectedId]: next };
+    });
+  }
+
+  function submitOverride() {
+    setResults((r) => {
+      const next = {
+        ...r[selectedId],
+        humanDecision: "overridden",
+        finalProposal: { ...(r[selectedId].finalProposal || r[selectedId].proposal), draftMessage: overrideText },
+      };
+      next.audit = buildAuditFromResult(next);
+      return { ...r, [selectedId]: next };
+    });
+    setOverriding(false);
+  }
+
+  function selectTxn(id) {
+    setSelectedId(id);
+    setOverriding(false);
+    setOverrideText("");
+  }
+
+  function openTxnFromDash(id) {
+    selectTxn(id);
+    setView("workspace");
+  }
+
+  const status = selectedResult?.status || "pending";
+  const page = PAGE_META[view] || PAGE_META.dashboard;
+  const pendingCount = metrics.pending;
+  const escalationNavCount = metrics.escalated + transactions.filter((t) => {
+    const r = results[t.id];
+    return r?.status === "resolved" && !r.humanDecision;
+  }).length;
+
+  const navCounts = {
+    workspace: pendingCount,
+    escalations: escalationNavCount,
+  };
+
+  let lastSection = null;
+
+  return (
+    <div className="pra-root">
+      <style>{STYLE}</style>
+
+      <aside className="pra-sidebar">
+        <div className="pra-sidebar-brand">
+          <div className="pra-sidebar-brand-name">Razorpay Ops AI</div>
+          <div className="pra-sidebar-brand-sub">Mock merchant payment console</div>
+        </div>
+        <nav className="pra-sidebar-nav">
+          {NAV_ITEMS.map((item) => {
+            const showSection = item.section !== lastSection;
+            lastSection = item.section;
+            const count = navCounts[item.id];
+            return (
+              <div key={item.id}>
+                {showSection && <div className="pra-sidebar-section">{item.section}</div>}
+                <button
+                  className={`pra-side-item ${view === item.id ? "pra-side-item-active" : ""}`}
+                  onClick={() => {
+                    setView(item.id);
+                    if (item.id === "escalations") {
+                      const first = transactions.find((t) => {
+                        const r = results[t.id];
+                        if (!r) return false;
+                        if (r.status === "escalated") return true;
+                        if (r.status === "resolved" && !r.humanDecision) return true;
+                        return false;
+                      });
+                      if (first) selectTxn(first.id);
+                    }
+                  }}
+                >
+                  <span className="pra-side-icon"><item.Icon /></span>
+                  <span className="pra-side-label">{item.label}</span>
+                  {count > 0 && (
+                    <span className={`pra-side-count ${item.id === "escalations" ? "pra-side-count-alert" : ""}`}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </nav>
+        <div className="pra-sidebar-foot">
+          Investigator → Resolver → Reviewer
+        </div>
+      </aside>
+
+      <div className="pra-main">
+        <header className="pra-header">
+          <div>
+            <div className="pra-header-title">{page.title}</div>
+            <div className="pra-header-sub">{page.sub}</div>
+          </div>
+          <div className="pra-stats">
+            <div>
+              <div className="pra-stat-value" style={{ color: "#C4392B" }}>{formatINR(metrics.atRiskAmount)}</div>
+              <div className="pra-stat-label">₹ at risk</div>
+            </div>
+            <div>
+              <div className="pra-stat-value">{metrics.processed}</div>
+              <div className="pra-stat-label">Processed</div>
+            </div>
+            <div>
+              <div className="pra-stat-value" style={{ color: "#7C4FD8" }}>{metrics.revisionCount}</div>
+              <div className="pra-stat-label">Revisions</div>
+            </div>
+            <div>
+              <div className="pra-stat-value" style={{ color: "#C4392B" }}>{metrics.escalated}</div>
+              <div className="pra-stat-label">Escalated</div>
+            </div>
+          </div>
+        </header>
+
+        {view === "dashboard" && (
+          <Dashboard
+            metrics={metrics}
+            onOpenQueue={() => setView("workspace")}
+            onOpenTxn={openTxnFromDash}
+          />
+        )}
+
+        {view === "agents" && <AgentsView metrics={metrics} />}
+
+        {(view === "workspace" || view === "escalations") && (
+        <div className="pra-body">
+          <aside className="pra-queue">
+            <div className="pra-queue-toolbar">
+              {view === "workspace" ? (
+                <button className="pra-btn pra-btn-ghost pra-btn-sm" onClick={() => setShowAddForm(true)}>
+                  + Add transaction
+                </button>
+              ) : (
+                <div className="pra-muted" style={{ fontSize: 12, padding: "4px 2px" }}>
+                  {displayedTxns.length} needing attention
+                </div>
+              )}
+            </div>
+            <div className="pra-queue-list">
+              {displayedTxns.length === 0 && (
+                <div className="pra-muted" style={{ padding: 20, fontSize: 13 }}>
+                  {view === "escalations" ? "No escalations right now." : "Queue is empty."}
+                </div>
+              )}
+              {displayedTxns.map((t) => {
+                const r = results[t.id];
+                const rowStatus = r?.status || "pending";
+                return (
+                  <div
+                    key={t.id}
+                    onClick={() => selectTxn(t.id)}
+                    className={`pra-row ${selectedId === t.id ? "pra-row-active" : ""}`}
+                  >
+                    <div className="pra-row-top">
+                      <span className="pra-mono pra-row-id">{t.id}</span>
+                      <span className={`pra-badge pra-badge-${rowStatus}`}>{rowStatus}</span>
+                    </div>
+                    <div className="pra-row-amount">{t.amount}</div>
+                    <div className="pra-row-code">{t.method} · {t.merchantName || "Merchant"} · {t.gatewayCode}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </aside>
+
+          <main className="pra-detail">
+            {(!selected || (view === "escalations" && !displayedTxns.find((t) => t.id === selectedId))) && (
+              <div className="pra-detail-empty">
+                {view === "escalations" ? "Select an escalation from the list" : "Select a transaction from the queue"}
+              </div>
+            )}
+
+            {selected && (view !== "escalations" || displayedTxns.find((t) => t.id === selectedId)) && (
+            <>
+              <div className="pra-detail-header">
+                <div className="pra-detail-header-top">
+                  <div>
+                    <div className="pra-mono pra-detail-id">{selected.id}</div>
+                    <div className="pra-detail-meta">
+                      <span className={`pra-badge pra-badge-${status}`}>{status}</span>
+                      <span className="pra-chip">{selected.gatewayCode}</span>
+                      <span className="pra-chip">{selected.method}</span>
+                      <span className="pra-muted" style={{ fontSize: 12 }}>{selected.merchantName}</span>
+                      <span className="pra-muted" style={{ fontSize: 12 }}>{selected.ts}</span>
+                    </div>
+                  </div>
+                  <div className="pra-detail-amount">{selected.amount}</div>
+                </div>
+                <p className="pra-detail-note">{selected.note}</p>
+
+                <div className="pra-id-grid">
+                  <div className="pra-id-item"><div className="pra-id-k">payment_id</div><div className="pra-mono pra-id-v">{selected.id}</div></div>
+                  <div className="pra-id-item"><div className="pra-id-k">order_id</div><div className="pra-mono pra-id-v">{selected.orderId}</div></div>
+                  <div className="pra-id-item"><div className="pra-id-k">merchant_id</div><div className="pra-mono pra-id-v">{selected.merchantId}</div></div>
+                  <div className="pra-id-item"><div className="pra-id-k">settlement_id</div><div className="pra-mono pra-id-v">{selected.settlementId}</div></div>
+                  <div className="pra-id-item"><div className="pra-id-k">refund_id</div><div className="pra-mono pra-id-v">{selected.refundId}</div></div>
+                  <div className="pra-id-item"><div className="pra-id-k">bank RRN</div><div className="pra-mono pra-id-v">{selected.rrn}</div></div>
+                </div>
+
+                <div className="pra-detail-actions">
+                  {!selectedResult && (
+                    <button className="pra-btn pra-btn-primary" onClick={() => runAgent(selected)}>
+                      Run pipeline
+                    </button>
+                  )}
+                  {selectedResult?.status === "error" && (
+                    <button className="pra-btn pra-btn-ghost" onClick={() => runAgent(selected)}>
+                      Retry pipeline
+                    </button>
+                  )}
+                  {selectedResult?.status === "processing" && (
+                    <div className="pra-waiting" style={{ padding: "8px 12px", border: "none", background: "transparent" }}>
+                      <div className="pra-spinner" />
+                      Pipeline running…
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="pra-detail-body">
+                <div className="pra-detail-inner">
+                  <div className="pra-section-title">Evidence timeline</div>
+                  <div className="pra-card" style={{ padding: "16px 16px 4px" }}>
+                    <div className="pra-timeline">
+                      {(selected.evidence || []).map((ev, i) => (
+                        <div className="pra-tl-item" key={i}>
+                          <div className="pra-mono pra-tl-time">{ev.time}</div>
+                          <div className="pra-tl-rail">
+                            <div className={`pra-tl-dot ${ev.tone === "ok" ? "pra-tl-dot-ok" : ev.tone === "bad" ? "pra-tl-dot-bad" : "pra-tl-dot-warn"}`} />
+                          </div>
+                          <div className="pra-tl-body">
+                            <div className="pra-tl-title">{ev.title}</div>
+                            <div className="pra-tl-desc">{ev.desc}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pra-section-title">Razorpay action catalog</div>
+                  <div className="pra-action-list">
+                    {(RAZORPAY_ACTIONS[selected.gatewayCode] || [{ name: "Escalate to ops", desc: "Manual review", tag: "rec", tagLabel: "Recommended" }]).map((a) => {
+                      const chosen = selectedResult?.finalProposal?.action || selectedResult?.proposal?.action || "";
+                      const isActive = chosen === a.name || (chosen && a.name.toLowerCase().includes(chosen.toLowerCase().slice(0, 12)));
+                      return (
+                        <div key={a.name} className={`pra-action-item ${isActive ? "pra-action-item-active" : ""}`}>
+                          <div>
+                            <div className="pra-action-name">{a.name}</div>
+                            <div className="pra-action-desc">{a.desc}</div>
+                          </div>
+                          <span className={`pra-action-tag pra-action-tag-${a.tag}`}>{isActive ? "Selected" : a.tagLabel}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {selectedResult?.status === "error" && (
+                    <div style={{ color: "#C4392B", fontSize: 13, margin: "16px 0 12px" }}>{selectedResult.error}</div>
+                  )}
+
+                  {!selectedResult && (
+                    <div className="pra-waiting" style={{ marginTop: 18 }}>
+                      Evidence loaded. Click <strong style={{ color: "#1A1D24" }}>Run pipeline</strong> to start agents.
+                    </div>
+                  )}
+
+                  {selectedResult && selectedResult.status !== "error" && (
+                    <>
+                      <div className="pra-section-title">Agent pipeline</div>
+                      {!selectedResult.investigation && (
+                        <div className="pra-waiting">
+                          <div className="pra-spinner" />
+                          Investigator is reasoning…
+                        </div>
+                      )}
+
+                      {selectedResult.investigation && (
+                        <div className="pra-agent-card">
+                          <div className="pra-agent-head">
+                            <div>
+                              <span className="pra-dot pra-dot-investigator" />
+                              <span className="pra-agent-name">Investigator</span>
+                              <div className="pra-agent-role" style={{ marginLeft: 15 }}>establishes facts · no opinions on action</div>
+                            </div>
+                          </div>
+                          <div className="pra-agent-body">
+                            {selectedResult.investigation.findings.map((f, i) => (
+                              <div key={i} className="pra-finding">{f}</div>
+                            ))}
+                            <div style={{ fontSize: 13, marginTop: 12, paddingTop: 12, borderTop: "1px solid #F0F1F3" }}>
+                              Classified as <strong>{selectedResult.investigation.classification}</strong>
+                              <span className="pra-muted"> · confidence {selectedResult.investigation.confidence}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedResult.status === "escalated" && selectedResult.escalateReason === "Investigator confidence too low to proceed" && (
+                        <div className="pra-arrow">↓ confidence below {LOW_CONFIDENCE_THRESHOLD} — routed to human, Resolver skipped</div>
+                      )}
+
+                      {selectedResult.investigation && selectedResult.investigation.confidence >= LOW_CONFIDENCE_THRESHOLD && (
+                        <div className="pra-arrow">↓</div>
+                      )}
+
+                      {(selectedResult.reviews || []).map((review, i) => (
+                        <div key={i}>
+                          <div className="pra-agent-card">
+                            <div className="pra-agent-head">
+                              <div>
+                                <span className="pra-dot pra-dot-resolver" />
+                                <span className="pra-agent-name">Resolver{i > 0 ? ` — revision ${i + 1}` : ""}</span>
+                                <div className="pra-agent-role" style={{ marginLeft: 15 }}>proposes the action</div>
+                              </div>
+                            </div>
+                            <div className="pra-agent-body">
+                              <div style={{ fontSize: 14, fontWeight: 600 }}>{selectedResult.proposalHistory?.[i]?.action}</div>
+                              <div className="pra-muted" style={{ fontSize: 13, marginTop: 6, lineHeight: 1.45 }}>
+                                {selectedResult.proposalHistory?.[i]?.rationale}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="pra-arrow">↓</div>
+                          <div className="pra-agent-card">
+                            <div className="pra-agent-head">
+                              <div>
+                                <span className="pra-dot pra-dot-reviewer" />
+                                <span className="pra-agent-name">Risk Reviewer</span>
+                                <div className="pra-agent-role" style={{ marginLeft: 15 }}>skeptically checks before it reaches a human</div>
+                              </div>
+                            </div>
+                            <div className="pra-agent-body">
+                              <span className={review.approved ? "pra-approve-tag" : "pra-reject-tag"}>
+                                {review.approved ? "APPROVED" : "REJECTED"}
+                              </span>
+                              <div style={{ fontSize: 13, lineHeight: 1.45 }}>{review.reviewNote}</div>
+                            </div>
+                          </div>
+                          {!review.approved && i < (selectedResult.reviews.length - 1) && (
+                            <div className="pra-arrow">↓ sent back to Resolver with the objection above</div>
+                          )}
+                        </div>
+                      ))}
+
+                      {selectedResult.status === "processing" && selectedResult.investigation && !(selectedResult.reviews?.length) && selectedResult.investigation.confidence >= LOW_CONFIDENCE_THRESHOLD && (
+                        <div className="pra-waiting" style={{ marginTop: 4 }}>
+                          <div className="pra-spinner" />
+                          Resolver is proposing an action…
+                        </div>
+                      )}
+
+                      {selectedResult.status === "escalated" && selectedResult.escalateReason && selectedResult.escalateReason !== "Investigator confidence too low to proceed" && (
+                        <div className="pra-muted" style={{ fontSize: 12, marginTop: 8, marginBottom: 12 }}>
+                          Retry budget used up without approval — escalated rather than forced through.
+                        </div>
+                      )}
+
+                      {(selectedResult.status === "resolved" || selectedResult.status === "escalated") && (
+                        <div className="pra-panel" style={{ marginTop: 16 }}>
+                          <div className="pra-outcome-bar">
+                            <span className={`pra-badge pra-badge-${selectedResult.status}`}>
+                              {selectedResult.finalProposal?.action || selectedResult.proposal?.action || "Escalated to human"}
+                            </span>
+                          </div>
+
+                          <div className="pra-msg-channel">Customer message preview · SMS / email</div>
+                          <div className="pra-msg-preview" style={{ marginBottom: 16 }}>
+                            {selectedResult.finalProposal?.draftMessage || selectedResult.proposal?.draftMessage || "No confident proposal — needs manual review."}
+                          </div>
+
+                          {!selectedResult.humanDecision && !overriding && (
+                            <div className="pra-outcome-actions">
+                              <button className="pra-btn pra-btn-approve" onClick={approve}>Approve</button>
+                              <button
+                                className="pra-btn pra-btn-override"
+                                onClick={() => {
+                                  setOverriding(true);
+                                  setOverrideText(selectedResult.finalProposal?.draftMessage || selectedResult.proposal?.draftMessage || "");
+                                }}
+                              >
+                                Override
+                              </button>
+                            </div>
+                          )}
+
+                          {overriding && (
+                            <div>
+                              <textarea
+                                className="pra-textarea"
+                                rows={3}
+                                value={overrideText}
+                                onChange={(e) => setOverrideText(e.target.value)}
+                              />
+                              <div className="pra-outcome-actions" style={{ marginTop: 10 }}>
+                                <button className="pra-btn pra-btn-primary" onClick={submitOverride}>Submit override</button>
+                                <button className="pra-btn pra-btn-ghost" onClick={() => setOverriding(false)}>Cancel</button>
+                              </div>
+                            </div>
+                          )}
+
+                          {selectedResult.humanDecision && (
+                            <div className="pra-muted" style={{ fontSize: 12 }}>
+                              {selectedResult.humanDecision === "approved" ? "✓ Approved by reviewer" : "✎ Overridden by reviewer"}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {(selectedResult.audit?.length > 0 || selectedResult.investigation) && (
+                        <>
+                          <div className="pra-section-title">Audit trail</div>
+                          <div className="pra-card">
+                            <div className="pra-audit">
+                              {(selectedResult.audit || buildAuditFromResult(selectedResult)).map((entry, i) => (
+                                <div className="pra-audit-row" key={i}>
+                                  <div className="pra-mono pra-audit-ts">{entry.ts}</div>
+                                  <div>
+                                    <div className="pra-audit-who">{entry.who}</div>
+                                    <div className="pra-audit-what">{entry.what}</div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+            )}
+          </main>
+        </div>
+        )}
+
+        {showAddForm && (
+          <div className="pra-overlay" onClick={() => { setShowAddForm(false); setFormError(""); }}>
+            <div className="pra-modal" onClick={(e) => e.stopPropagation()}>
+              <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 18, letterSpacing: "-0.02em" }}>Add transaction</div>
+
+              <span className="pra-field-label">Amount (INR)</span>
+              <input
+                className="pra-input"
+                placeholder="1,250.00"
+                value={form.amount}
+                onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+                style={{ marginBottom: 14 }}
+                autoFocus
+              />
+
+              <span className="pra-field-label">Gateway code</span>
+              <select
+                className="pra-input"
+                value={form.gatewayCode}
+                onChange={(e) => setForm((f) => ({ ...f, gatewayCode: e.target.value }))}
+                style={{ marginBottom: 18 }}
+              >
+                {GATEWAY_CODES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+
+              <div className="pra-modal-actions">
+                <button className="pra-btn pra-btn-primary" style={{ flex: 1 }} onClick={addTransaction}>
+                  Add to queue
+                </button>
+                <button className="pra-btn pra-btn-ghost" onClick={() => { setShowAddForm(false); setFormError(""); }}>
+                  Cancel
+                </button>
+              </div>
+              {formError && (
+                <div style={{ color: "#C4392B", fontSize: 12, marginTop: 12 }}>{formError}</div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
