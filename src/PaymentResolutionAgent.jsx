@@ -971,7 +971,266 @@ const STYLE = `
   @media (max-width: 960px) {
     .pra-agent-detail, .pra-example-grid { grid-template-columns: 1fr; }
   }
+
+  /* Live agent workflow */
+  .pra-live {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding: 28px 32px 48px;
+  }
+  .pra-live-inner { max-width: 720px; margin: 0 auto; }
+  .pra-live-hero {
+    margin-bottom: 22px;
+  }
+  .pra-live-hero h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0 0 6px;
+  }
+  .pra-live-hero p {
+    margin: 0;
+    font-size: 14px;
+    color: #8A8F98;
+    line-height: 1.5;
+    max-width: 560px;
+  }
+  .pra-live-case {
+    background: #FFFFFF;
+    border: 1px solid #E4E6EB;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .pra-live-case-id { font-size: 15px; font-weight: 700; }
+  .pra-live-case-meta { font-size: 12px; color: #8A8F98; margin-top: 4px; line-height: 1.45; }
+  .pra-live-flow { display: flex; flex-direction: column; align-items: stretch; }
+  .pra-live-node {
+    background: #FFFFFF;
+    border: 1px solid #E4E6EB;
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .pra-live-node-active {
+    border-color: #3B5BDB;
+    box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12);
+  }
+  .pra-live-node-done { border-color: #D8DADF; }
+  .pra-live-node-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #FAFBFC;
+    border-bottom: 1px solid #F0F1F3;
+  }
+  .pra-live-node-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .pra-live-node-status {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #8A8F98;
+  }
+  .pra-live-node-status-active { color: #3B5BDB; }
+  .pra-live-node-status-done { color: #1E8A4C; }
+  .pra-live-node-body { padding: 16px; }
+  .pra-live-thinking {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #5C6370;
+    margin-bottom: 12px;
+  }
+  .pra-check-list { display: flex; flex-direction: column; gap: 8px; }
+  .pra-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #8A8F98;
+    transition: color 0.15s ease;
+  }
+  .pra-check-done { color: #1A1D24; font-weight: 500; }
+  .pra-check-mark {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid #D8DADF;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 11px; color: transparent;
+  }
+  .pra-check-done .pra-check-mark {
+    background: #E6F7ED;
+    border-color: #1E8A4C;
+    color: #1E8A4C;
+  }
+  .pra-live-finding-box {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #F7F9FF;
+    border: 1px solid #D6E0FF;
+    border-radius: 10px;
+  }
+  .pra-live-finding-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #3B5BDB;
+    margin-bottom: 6px;
+  }
+  .pra-live-finding-main {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .pra-live-conf {
+    font-size: 13px;
+    color: #5C6370;
+    margin-top: 4px;
+  }
+  .pra-live-action {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .pra-live-reason {
+    font-size: 13px;
+    color: #5C6370;
+    line-height: 1.5;
+  }
+  .pra-live-reason strong { color: #1A1D24; }
+  .pra-live-decision {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .pra-live-risk {
+    font-size: 13px;
+    color: #5C6370;
+    margin-bottom: 10px;
+  }
+  .pra-live-evidence {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: #5C6370;
+    line-height: 1.55;
+  }
+  .pra-live-evidence li { margin-bottom: 4px; }
+  .pra-live-arrow {
+    text-align: center;
+    color: #C0C4CC;
+    font-size: 18px;
+    padding: 8px 0;
+    line-height: 1;
+  }
+  .pra-live-human {
+    border-style: dashed;
+  }
+  .pra-live-cta-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  @media (max-width: 900px) {
+    .pra-live { padding: 16px 14px 32px; }
+    .pra-live-hero h1 { font-size: 22px; }
+    .pra-live-cta-row .pra-btn { flex: 1; min-width: 140px; }
+  }
 `;
+
+const EVIDENCE_CHECKS = {
+  TIMEOUT_ERROR: [
+    "Payment timeline retrieved",
+    "Bank RRN matched",
+    "Webhook events checked",
+    "Customer complaint correlated",
+  ],
+  SUCCESS: [
+    "Payment timeline retrieved",
+    "Gateway SUCCESS confirmed",
+    "Webhook delivery checked",
+    "Merchant order state compared",
+  ],
+  DUPLICATE_REF: [
+    "Payment timeline retrieved",
+    "Sibling payment_id scanned",
+    "Card fingerprint matched",
+    "Order linkage verified",
+  ],
+  INSUFFICIENT_FUNDS: [
+    "Payment timeline retrieved",
+    "Issuer decline code read",
+    "Settlement movement checked",
+    "Complaint queue scanned",
+  ],
+  RISK_HOLD: [
+    "Payment timeline retrieved",
+    "Bank RRN matched",
+    "Webhook events checked",
+    "Device velocity checked",
+  ],
+  WEBHOOK_DELAY: [
+    "Payment timeline retrieved",
+    "Gateway capture confirmed",
+    "Webhook queue inspected",
+    "Merchant endpoint health checked",
+  ],
+  USER_CANCELLED: [
+    "Payment timeline retrieved",
+    "UPI collect status read",
+    "Authorization window checked",
+    "Debit presence verified",
+  ],
+  CURRENCY_MISMATCH: [
+    "Payment timeline retrieved",
+    "Quoted currency read",
+    "Settlement FX compared",
+    "Ledger delta estimated",
+  ],
+  PARTIAL_REFUND: [
+    "Payment timeline retrieved",
+    "Original capture amount read",
+    "refund_id totals compared",
+    "Customer dispute note parsed",
+  ],
+};
+
+function evidenceChecksFor(txn) {
+  return EVIDENCE_CHECKS[txn.gatewayCode] || [
+    "Payment timeline retrieved",
+    "Gateway code inspected",
+    "Webhook events checked",
+    "Merchant note parsed",
+  ];
+}
+
+function riskScoreFor(result) {
+  if (!result) return null;
+  const rejected = (result.reviews || []).filter((r) => !r.approved).length;
+  const conf = result.investigation?.confidence || 0.7;
+  if (result.status === "escalated") return Math.min(0.98, Math.round((0.55 + rejected * 0.12 + (1 - conf) * 0.2) * 100) / 100);
+  if (rejected > 0) return Math.min(0.95, Math.round((0.45 + rejected * 0.15) * 100) / 100);
+  return Math.max(0.12, Math.round((1 - conf) * 0.5 * 100) / 100);
+}
 
 const MERCHANTS = [
   { id: "acc_Hk9mP2Qx", name: "UrbanKart Retail" },
@@ -1591,7 +1850,15 @@ function fillAmount(text, amount) {
 /** Local multi-agent simulation — the browser cannot call Anthropic directly (no API key + CORS). */
 async function runPipeline(txn, onStage) {
   const book = playbookFor(txn);
-  let snapshot = { status: "processing", reviews: [], proposalHistory: [] };
+  const checks = evidenceChecksFor(txn).map((label) => ({ label, done: false }));
+  let snapshot = {
+    status: "processing",
+    reviews: [],
+    proposalHistory: [],
+    livePhase: "investigator",
+    liveChecks: checks,
+    liveStatus: "Analyzing evidence…",
+  };
 
   const emit = (patch) => {
     snapshot = { ...snapshot, ...patch };
@@ -1600,13 +1867,26 @@ async function runPipeline(txn, onStage) {
     onStage({ ...patch, audit: snapshot.audit });
   };
 
-  await sleep(700);
+  emit({ livePhase: "investigator", liveChecks: checks.map((c) => ({ ...c })), liveStatus: "Analyzing evidence…" });
+
+  for (let i = 0; i < checks.length; i++) {
+    await sleep(420);
+    checks[i] = { ...checks[i], done: true };
+    emit({ liveChecks: checks.map((c) => ({ ...c })), liveStatus: i === checks.length - 1 ? "Synthesizing finding…" : "Analyzing evidence…" });
+  }
+
+  await sleep(500);
   const investigation = { ...book.investigation, findings: [...book.investigation.findings] };
-  emit({ investigation });
+  emit({ investigation, livePhase: "investigator_done", liveStatus: "Finding ready" });
 
   if (investigation.confidence < LOW_CONFIDENCE_THRESHOLD) {
-    await sleep(400);
-    emit({ finalStatus: "escalated", escalateReason: "Investigator confidence too low to proceed" });
+    await sleep(450);
+    emit({
+      finalStatus: "escalated",
+      escalateReason: "Investigator confidence too low to proceed",
+      livePhase: "human",
+      liveStatus: "Escalated to human",
+    });
     return;
   }
 
@@ -1616,7 +1896,13 @@ async function runPipeline(txn, onStage) {
   const maxAttempts = Math.min(MAX_REVISIONS, Math.max(book.proposals.length, book.reviews.length) - 1);
 
   for (let attempt = 0; attempt <= maxAttempts; attempt++) {
-    await sleep(650);
+    await sleep(350);
+    emit({
+      livePhase: "resolver",
+      liveStatus: attempt === 0 ? "Proposing action…" : `Revising proposal (${attempt + 1})…`,
+      attempt,
+    });
+    await sleep(700);
     const raw = book.proposals[Math.min(attempt, book.proposals.length - 1)];
     proposal = {
       action: raw.action,
@@ -1624,21 +1910,40 @@ async function runPipeline(txn, onStage) {
       draftMessage: fillAmount(raw.draftMessage, txn.amount),
     };
     proposalHistory = [...proposalHistory, proposal];
-    emit({ proposal, proposalHistory, attempt });
+    emit({ proposal, proposalHistory, attempt, livePhase: "resolver_done", liveStatus: "Proposal ready" });
 
-    await sleep(550);
+    await sleep(350);
+    emit({ livePhase: "reviewer", liveStatus: "Stress-testing proposal…" });
+    await sleep(750);
     const reviewSrc = book.reviews[Math.min(attempt, book.reviews.length - 1)];
     const review = { attempt, approved: reviewSrc.approved, reviewNote: reviewSrc.reviewNote };
     reviews = [...reviews, review];
-    emit({ reviews });
+    emit({
+      reviews,
+      livePhase: "reviewer_done",
+      liveStatus: review.approved ? "Approved" : "Rejected — sending back",
+    });
 
     if (review.approved) {
-      emit({ finalStatus: "resolved", finalProposal: proposal });
+      await sleep(400);
+      emit({
+        finalStatus: "resolved",
+        finalProposal: proposal,
+        livePhase: "human",
+        liveStatus: "Awaiting human approval",
+      });
       return;
     }
   }
 
-  emit({ finalStatus: "escalated", escalateReason: "Risk Reviewer did not approve after revisions", finalProposal: proposal });
+  await sleep(400);
+  emit({
+    finalStatus: "escalated",
+    escalateReason: "Risk Reviewer did not approve after revisions",
+    finalProposal: proposal,
+    livePhase: "human",
+    liveStatus: "Escalated to human",
+  });
 }
 
 const MAX_REVISIONS = 2;
@@ -1717,6 +2022,298 @@ function computeMetrics(transactions, results) {
     atRiskCount: atRiskTxns.length,
     recoveredAmount,
   };
+}
+
+function phaseRank(phase) {
+  const order = {
+    idle: 0,
+    investigator: 1,
+    investigator_done: 2,
+    resolver: 3,
+    resolver_done: 4,
+    reviewer: 5,
+    reviewer_done: 6,
+    human: 7,
+  };
+  return order[phase] || 0;
+}
+
+function AgentLiveWorkflow({ txn, result, onApprove, onOverride, onRun, compact }) {
+  const phase = result?.livePhase || (result?.investigation ? (result.status === "processing" ? "resolver" : "human") : result ? "investigator_done" : "idle");
+  const rank = phaseRank(result?.status === "processing" ? phase : (result ? "human" : "idle"));
+  const checks = result?.liveChecks || evidenceChecksFor(txn).map((label) => ({ label, done: !!result?.investigation }));
+  const invActive = phase === "investigator" || (!result?.investigation && result?.status === "processing");
+  const invDone = !!result?.investigation;
+  const proposals = result?.proposalHistory || [];
+  const reviews = result?.reviews || [];
+  const finalAction = result?.finalProposal?.action || result?.proposal?.action;
+  const risk = riskScoreFor(result);
+  const showHuman = result && (result.status === "resolved" || result.status === "escalated" || phase === "human");
+
+  return (
+    <div className="pra-live-flow">
+      <div className="pra-live-case" style={compact ? { marginBottom: 14 } : undefined}>
+        <div>
+          <div className="pra-mono pra-live-case-id">{txn.id}</div>
+          <div className="pra-live-case-meta">
+            {txn.amount} · {txn.gatewayCode} · {txn.method} · {txn.merchantName}
+            <br />
+            {txn.note}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <span className={`pra-badge pra-badge-${result?.status || "pending"}`}>{result?.status || "pending"}</span>
+          {onRun && (!result || result.status === "error" || result.status === "resolved" || result.status === "escalated") && (
+            <button className="pra-btn pra-btn-primary" onClick={onRun}>
+              {result ? "Replay agents" : "Watch agents work"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Investigator */}
+      <div className={`pra-live-node ${invActive ? "pra-live-node-active" : invDone ? "pra-live-node-done" : ""}`}>
+        <div className="pra-live-node-head">
+          <div className="pra-live-node-title">
+            <span className="pra-dot pra-dot-investigator" style={{ width: 10, height: 10 }} />
+            Investigator
+          </div>
+          <div className={`pra-live-node-status ${invActive ? "pra-live-node-status-active" : invDone ? "pra-live-node-status-done" : ""}`}>
+            {invActive ? (result?.liveStatus || "Analyzing evidence…") : invDone ? "Done" : "Waiting"}
+          </div>
+        </div>
+        <div className="pra-live-node-body">
+          {(invActive || invDone) && (
+            <>
+              {invActive && (
+                <div className="pra-live-thinking">
+                  <div className="pra-spinner" />
+                  {result?.liveStatus || "Analyzing evidence…"}
+                </div>
+              )}
+              <div className="pra-check-list">
+                {checks.map((c) => (
+                  <div key={c.label} className={`pra-check ${c.done ? "pra-check-done" : ""}`}>
+                    <span className="pra-check-mark">{c.done ? "✓" : ""}</span>
+                    {c.label}
+                  </div>
+                ))}
+              </div>
+              {invDone && result.investigation && (
+                <div className="pra-live-finding-box">
+                  <div className="pra-live-finding-label">Finding</div>
+                  <div className="pra-live-finding-main">{result.investigation.classification}</div>
+                  <div className="pra-live-conf">Confidence: {result.investigation.confidence}</div>
+                  <div style={{ marginTop: 10 }}>
+                    {result.investigation.findings.map((f, i) => (
+                      <div key={i} className="pra-finding">{f}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          {!invActive && !invDone && (
+            <div className="pra-muted" style={{ fontSize: 13 }}>Waiting for pipeline start…</div>
+          )}
+        </div>
+      </div>
+
+      <div className="pra-live-arrow">↓</div>
+
+      {/* Resolver + Reviewer loops */}
+      {proposals.length === 0 && (phase === "resolver" || rank >= phaseRank("resolver")) && result?.status === "processing" && (
+        <>
+          <div className="pra-live-node pra-live-node-active">
+            <div className="pra-live-node-head">
+              <div className="pra-live-node-title">
+                <span className="pra-dot pra-dot-resolver" style={{ width: 10, height: 10 }} />
+                Resolver
+              </div>
+              <div className="pra-live-node-status pra-live-node-status-active">{result.liveStatus || "Proposing action…"}</div>
+            </div>
+            <div className="pra-live-node-body">
+              <div className="pra-live-thinking">
+                <div className="pra-spinner" />
+                Choosing a Razorpay ops action…
+              </div>
+            </div>
+          </div>
+          <div className="pra-live-arrow">↓</div>
+        </>
+      )}
+
+      {proposals.map((p, i) => {
+        const review = reviews[i];
+        const isLatest = i === proposals.length - 1;
+        const resolverActive = isLatest && phase === "resolver";
+        const reviewerActive = isLatest && phase === "reviewer";
+        return (
+          <div key={i}>
+            <div className={`pra-live-node ${resolverActive ? "pra-live-node-active" : "pra-live-node-done"}`}>
+              <div className="pra-live-node-head">
+                <div className="pra-live-node-title">
+                  <span className="pra-dot pra-dot-resolver" style={{ width: 10, height: 10 }} />
+                  Resolver{i > 0 ? ` — revision ${i + 1}` : ""}
+                </div>
+                <div className={`pra-live-node-status ${resolverActive ? "pra-live-node-status-active" : "pra-live-node-status-done"}`}>
+                  {resolverActive ? "Working…" : "Proposed"}
+                </div>
+              </div>
+              <div className="pra-live-node-body">
+                <div className="pra-live-finding-label">Proposed action</div>
+                <div className="pra-live-action">{p.action}</div>
+                <div className="pra-live-reason"><strong>Reason:</strong> {p.rationale}</div>
+              </div>
+            </div>
+
+            <div className="pra-live-arrow">↓</div>
+
+            {(review || reviewerActive) && (
+              <>
+                <div className={`pra-live-node ${reviewerActive ? "pra-live-node-active" : "pra-live-node-done"}`}>
+                  <div className="pra-live-node-head">
+                    <div className="pra-live-node-title">
+                      <span className="pra-dot pra-dot-reviewer" style={{ width: 10, height: 10 }} />
+                      Risk Reviewer
+                    </div>
+                    <div className={`pra-live-node-status ${reviewerActive ? "pra-live-node-status-active" : "pra-live-node-status-done"}`}>
+                      {reviewerActive ? "Reviewing…" : review?.approved ? "Approved" : "Rejected"}
+                    </div>
+                  </div>
+                  <div className="pra-live-node-body">
+                    {reviewerActive && (
+                      <div className="pra-live-thinking">
+                        <div className="pra-spinner" />
+                        Stress-testing for fraud / financial risk…
+                      </div>
+                    )}
+                    {review && (
+                      <>
+                        <div className="pra-live-decision">
+                          <span className={review.approved ? "pra-approve-tag" : "pra-reject-tag"} style={{ marginBottom: 0 }}>
+                            {review.approved ? "APPROVE" : "REJECT"}
+                          </span>
+                        </div>
+                        {risk != null && (
+                          <div className="pra-live-risk">Risk score: <strong style={{ color: "#1A1D24" }}>{risk}</strong></div>
+                        )}
+                        <div className="pra-live-reason" style={{ marginBottom: 10 }}><strong>Note:</strong> {review.reviewNote}</div>
+                        <div className="pra-live-finding-label">Evidence</div>
+                        <ul className="pra-live-evidence">
+                          {(result.investigation?.findings || []).slice(0, 3).map((f) => (
+                            <li key={f}>{f}</li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {(!review?.approved || i < proposals.length - 1) && <div className="pra-live-arrow">↓</div>}
+                {review && !review.approved && i < proposals.length - 1 && (
+                  <div className="pra-muted" style={{ textAlign: "center", fontSize: 12, marginBottom: 8 }}>
+                    sent back to Resolver with the objection above
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })}
+
+      {showHuman && (
+        <>
+          {proposals.length > 0 && reviews[reviews.length - 1]?.approved && <div className="pra-live-arrow">↓</div>}
+          {result.status === "escalated" && proposals.length === 0 && <div className="pra-live-arrow">↓</div>}
+          <div className="pra-live-node pra-live-human pra-live-node-done">
+            <div className="pra-live-node-head">
+              <div className="pra-live-node-title">
+                <span style={{ fontSize: 14 }}>👤</span>
+                Human
+              </div>
+              <div className={`pra-live-node-status ${result.humanDecision ? "pra-live-node-status-done" : "pra-live-node-status-active"}`}>
+                {result.humanDecision ? (result.humanDecision === "approved" ? "Approved" : "Overridden") : "Needs decision"}
+              </div>
+            </div>
+            <div className="pra-live-node-body">
+              <div className="pra-live-action" style={{ fontSize: 16 }}>
+                {result.status === "escalated"
+                  ? (finalAction ? `Review escalation · ${finalAction}` : "Approve escalation")
+                  : `Approve “${finalAction || "proposal"}”`}
+              </div>
+              <div className="pra-msg-channel" style={{ marginTop: 8 }}>Customer message preview</div>
+              <div className="pra-msg-preview">
+                {result.finalProposal?.draftMessage || result.proposal?.draftMessage || "No draft — manual handling required."}
+              </div>
+              {!result.humanDecision && onApprove && (
+                <div className="pra-live-cta-row">
+                  <button className="pra-btn pra-btn-approve" onClick={onApprove}>Approve</button>
+                  {onOverride && <button className="pra-btn pra-btn-override" onClick={onOverride}>Override</button>}
+                </div>
+              )}
+              {result.humanDecision && (
+                <div className="pra-muted" style={{ fontSize: 12, marginTop: 12 }}>
+                  {result.humanDecision === "approved" ? "✓ Approved by reviewer" : "✎ Overridden by reviewer"}
+                </div>
+              )}
+              {result.escalateReason && (
+                <div className="pra-muted" style={{ fontSize: 12, marginTop: 10 }}>{result.escalateReason}</div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function LiveRunView({ transactions, results, onRun, onApprove, onOverride, onPick }) {
+  const showcaseId = "pay_2Xa9JgH4sQ";
+  const fallback = transactions.find((t) => t.gatewayCode === "RISK_HOLD") || transactions[0];
+  const txn = transactions.find((t) => t.id === showcaseId) || fallback;
+  const result = results[txn.id];
+  const running = result?.status === "processing";
+
+  return (
+    <div className="pra-live">
+      <div className="pra-live-inner">
+        <div className="pra-live-hero">
+          <h1>Watch the agents work</h1>
+          <p>
+            This is the AI. Investigator gathers evidence, Resolver proposes a Razorpay action,
+            Risk Reviewer stress-tests it — then a human decides. Hit play and follow the handoffs.
+          </p>
+        </div>
+
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+          {transactions.slice(0, 5).map((t) => (
+            <button
+              key={t.id}
+              className="pra-btn pra-btn-ghost"
+              style={{
+                fontSize: 12,
+                padding: "7px 10px",
+                borderColor: t.id === txn.id ? "#3B5BDB" : undefined,
+                background: t.id === txn.id ? "#F0F4FF" : undefined,
+              }}
+              onClick={() => onPick(t.id)}
+              disabled={running}
+            >
+              {t.gatewayCode}
+            </button>
+          ))}
+        </div>
+
+        <AgentLiveWorkflow
+          txn={txn}
+          result={result}
+          onRun={!running ? () => onRun(txn) : undefined}
+          onApprove={result && (result.status === "resolved" || result.status === "escalated") && !result.humanDecision ? () => onApprove(txn.id) : undefined}
+          onOverride={result && (result.status === "resolved" || result.status === "escalated") && !result.humanDecision ? () => onOverride(txn.id) : undefined}
+        />
+      </div>
+    </div>
+  );
 }
 
 function Dashboard({ metrics, onOpenQueue, onOpenTxn }) {
@@ -2235,7 +2832,17 @@ function IconAgents() {
   );
 }
 
+function IconLive() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="8" cy="8" r="5.5" />
+      <path d="M6.5 5.5 11 8l-4.5 2.5v-5z" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
+  { id: "liverun", label: "Live run", section: "Overview", Icon: IconLive },
   { id: "dashboard", label: "Dashboard", section: "Overview", Icon: IconDash },
   { id: "workspace", label: "Queue", section: "Operations", Icon: IconQueue },
   { id: "escalations", label: "Escalations", section: "Operations", Icon: IconEscalate },
@@ -2243,6 +2850,7 @@ const NAV_ITEMS = [
 ];
 
 const PAGE_META = {
+  liverun: { title: "Live run", sub: "Watch Investigator → Resolver → Risk Reviewer reason in real time" },
   dashboard: { title: "Dashboard", sub: "₹ at risk, agent funnel, and Razorpay exception health" },
   workspace: { title: "Resolution queue", sub: "payment_id exceptions across merchants" },
   escalations: { title: "Escalations", sub: "Cases needing human / Risk review" },
@@ -2250,7 +2858,7 @@ const PAGE_META = {
 };
 
 export default function PaymentResolutionAgent() {
-  const [view, setView] = useState("dashboard");
+  const [view, setView] = useState("liverun");
   const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
   const [results, setResults] = useState(SEED_RESULTS);
   const [selectedId, setSelectedId] = useState(INITIAL_TRANSACTIONS[0].id);
@@ -2337,12 +2945,19 @@ export default function PaymentResolutionAgent() {
     }
   }
 
-  function approve() {
+  function approve(id = selectedId) {
     setResults((r) => {
-      const next = { ...r[selectedId], humanDecision: "approved" };
+      const next = { ...r[id], humanDecision: "approved" };
       next.audit = buildAuditFromResult(next);
-      return { ...r, [selectedId]: next };
+      return { ...r, [id]: next };
     });
+  }
+
+  function beginOverride(id = selectedId) {
+    const r = results[id];
+    setSelectedId(id);
+    setOverriding(true);
+    setOverrideText(r?.finalProposal?.draftMessage || r?.proposal?.draftMessage || "");
   }
 
   function submitOverride() {
@@ -2488,6 +3103,17 @@ export default function PaymentResolutionAgent() {
           </div>
         </header>
 
+        {view === "liverun" && (
+          <LiveRunView
+            transactions={transactions}
+            results={results}
+            onRun={(txn) => { setSelectedId(txn.id); runAgent(txn); }}
+            onApprove={(id) => approve(id)}
+            onOverride={(id) => beginOverride(id)}
+            onPick={(id) => setSelectedId(id)}
+          />
+        )}
+
         {view === "dashboard" && (
           <Dashboard
             metrics={metrics}
@@ -2576,7 +3202,7 @@ export default function PaymentResolutionAgent() {
                 <div className="pra-detail-actions">
                   {!selectedResult && (
                     <button className="pra-btn pra-btn-primary" onClick={() => runAgent(selected)}>
-                      Run pipeline
+                      Watch agents work
                     </button>
                   )}
                   {selectedResult?.status === "error" && (
@@ -2642,145 +3268,14 @@ export default function PaymentResolutionAgent() {
 
                   {selectedResult && selectedResult.status !== "error" && (
                     <>
-                      <div className="pra-section-title">Agent pipeline</div>
-                      {!selectedResult.investigation && (
-                        <div className="pra-waiting">
-                          <div className="pra-spinner" />
-                          Investigator is reasoning…
-                        </div>
-                      )}
-
-                      {selectedResult.investigation && (
-                        <div className="pra-agent-card">
-                          <div className="pra-agent-head">
-                            <div>
-                              <span className="pra-dot pra-dot-investigator" />
-                              <span className="pra-agent-name">Investigator</span>
-                              <div className="pra-agent-role" style={{ marginLeft: 15 }}>establishes facts · no opinions on action</div>
-                            </div>
-                          </div>
-                          <div className="pra-agent-body">
-                            {selectedResult.investigation.findings.map((f, i) => (
-                              <div key={i} className="pra-finding">{f}</div>
-                            ))}
-                            <div style={{ fontSize: 13, marginTop: 12, paddingTop: 12, borderTop: "1px solid #F0F1F3" }}>
-                              Classified as <strong>{selectedResult.investigation.classification}</strong>
-                              <span className="pra-muted"> · confidence {selectedResult.investigation.confidence}</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {selectedResult.status === "escalated" && selectedResult.escalateReason === "Investigator confidence too low to proceed" && (
-                        <div className="pra-arrow">↓ confidence below {LOW_CONFIDENCE_THRESHOLD} — routed to human, Resolver skipped</div>
-                      )}
-
-                      {selectedResult.investigation && selectedResult.investigation.confidence >= LOW_CONFIDENCE_THRESHOLD && (
-                        <div className="pra-arrow">↓</div>
-                      )}
-
-                      {(selectedResult.reviews || []).map((review, i) => (
-                        <div key={i}>
-                          <div className="pra-agent-card">
-                            <div className="pra-agent-head">
-                              <div>
-                                <span className="pra-dot pra-dot-resolver" />
-                                <span className="pra-agent-name">Resolver{i > 0 ? ` — revision ${i + 1}` : ""}</span>
-                                <div className="pra-agent-role" style={{ marginLeft: 15 }}>proposes the action</div>
-                              </div>
-                            </div>
-                            <div className="pra-agent-body">
-                              <div style={{ fontSize: 14, fontWeight: 600 }}>{selectedResult.proposalHistory?.[i]?.action}</div>
-                              <div className="pra-muted" style={{ fontSize: 13, marginTop: 6, lineHeight: 1.45 }}>
-                                {selectedResult.proposalHistory?.[i]?.rationale}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="pra-arrow">↓</div>
-                          <div className="pra-agent-card">
-                            <div className="pra-agent-head">
-                              <div>
-                                <span className="pra-dot pra-dot-reviewer" />
-                                <span className="pra-agent-name">Risk Reviewer</span>
-                                <div className="pra-agent-role" style={{ marginLeft: 15 }}>skeptically checks before it reaches a human</div>
-                              </div>
-                            </div>
-                            <div className="pra-agent-body">
-                              <span className={review.approved ? "pra-approve-tag" : "pra-reject-tag"}>
-                                {review.approved ? "APPROVED" : "REJECTED"}
-                              </span>
-                              <div style={{ fontSize: 13, lineHeight: 1.45 }}>{review.reviewNote}</div>
-                            </div>
-                          </div>
-                          {!review.approved && i < (selectedResult.reviews.length - 1) && (
-                            <div className="pra-arrow">↓ sent back to Resolver with the objection above</div>
-                          )}
-                        </div>
-                      ))}
-
-                      {selectedResult.status === "processing" && selectedResult.investigation && !(selectedResult.reviews?.length) && selectedResult.investigation.confidence >= LOW_CONFIDENCE_THRESHOLD && (
-                        <div className="pra-waiting" style={{ marginTop: 4 }}>
-                          <div className="pra-spinner" />
-                          Resolver is proposing an action…
-                        </div>
-                      )}
-
-                      {selectedResult.status === "escalated" && selectedResult.escalateReason && selectedResult.escalateReason !== "Investigator confidence too low to proceed" && (
-                        <div className="pra-muted" style={{ fontSize: 12, marginTop: 8, marginBottom: 12 }}>
-                          Retry budget used up without approval — escalated rather than forced through.
-                        </div>
-                      )}
-
-                      {(selectedResult.status === "resolved" || selectedResult.status === "escalated") && (
-                        <div className="pra-panel" style={{ marginTop: 16 }}>
-                          <div className="pra-outcome-bar">
-                            <span className={`pra-badge pra-badge-${selectedResult.status}`}>
-                              {selectedResult.finalProposal?.action || selectedResult.proposal?.action || "Escalated to human"}
-                            </span>
-                          </div>
-
-                          <div className="pra-msg-channel">Customer message preview · SMS / email</div>
-                          <div className="pra-msg-preview" style={{ marginBottom: 16 }}>
-                            {selectedResult.finalProposal?.draftMessage || selectedResult.proposal?.draftMessage || "No confident proposal — needs manual review."}
-                          </div>
-
-                          {!selectedResult.humanDecision && !overriding && (
-                            <div className="pra-outcome-actions">
-                              <button className="pra-btn pra-btn-approve" onClick={approve}>Approve</button>
-                              <button
-                                className="pra-btn pra-btn-override"
-                                onClick={() => {
-                                  setOverriding(true);
-                                  setOverrideText(selectedResult.finalProposal?.draftMessage || selectedResult.proposal?.draftMessage || "");
-                                }}
-                              >
-                                Override
-                              </button>
-                            </div>
-                          )}
-
-                          {overriding && (
-                            <div>
-                              <textarea
-                                className="pra-textarea"
-                                rows={3}
-                                value={overrideText}
-                                onChange={(e) => setOverrideText(e.target.value)}
-                              />
-                              <div className="pra-outcome-actions" style={{ marginTop: 10 }}>
-                                <button className="pra-btn pra-btn-primary" onClick={submitOverride}>Submit override</button>
-                                <button className="pra-btn pra-btn-ghost" onClick={() => setOverriding(false)}>Cancel</button>
-                              </div>
-                            </div>
-                          )}
-
-                          {selectedResult.humanDecision && (
-                            <div className="pra-muted" style={{ fontSize: 12 }}>
-                              {selectedResult.humanDecision === "approved" ? "✓ Approved by reviewer" : "✎ Overridden by reviewer"}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      <div className="pra-section-title">Live agent workflow</div>
+                      <AgentLiveWorkflow
+                        txn={selected}
+                        result={selectedResult}
+                        compact
+                        onApprove={!selectedResult.humanDecision && (selectedResult.status === "resolved" || selectedResult.status === "escalated") ? () => approve() : undefined}
+                        onOverride={!selectedResult.humanDecision && (selectedResult.status === "resolved" || selectedResult.status === "escalated") ? () => beginOverride() : undefined}
+                      />
 
                       {(selectedResult.audit?.length > 0 || selectedResult.investigation) && (
                         <>
@@ -2808,6 +3303,25 @@ export default function PaymentResolutionAgent() {
             )}
           </main>
         </div>
+        )}
+
+        {overriding && (
+          <div className="pra-overlay" onClick={() => setOverriding(false)}>
+            <div className="pra-modal" onClick={(e) => e.stopPropagation()}>
+              <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Override customer message</div>
+              <textarea
+                className="pra-textarea"
+                rows={4}
+                value={overrideText}
+                onChange={(e) => setOverrideText(e.target.value)}
+                autoFocus
+              />
+              <div className="pra-modal-actions" style={{ marginTop: 14 }}>
+                <button className="pra-btn pra-btn-primary" style={{ flex: 1 }} onClick={submitOverride}>Submit override</button>
+                <button className="pra-btn pra-btn-ghost" onClick={() => setOverriding(false)}>Cancel</button>
+              </div>
+            </div>
+          </div>
         )}
 
         {showAddForm && (
