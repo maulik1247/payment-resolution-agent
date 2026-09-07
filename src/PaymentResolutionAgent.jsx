@@ -2267,55 +2267,6 @@ function AgentLiveWorkflow({ txn, result, onApprove, onOverride, onRun, compact 
   );
 }
 
-function LiveRunView({ transactions, results, onRun, onApprove, onOverride, onPick }) {
-  const showcaseId = "pay_2Xa9JgH4sQ";
-  const fallback = transactions.find((t) => t.gatewayCode === "RISK_HOLD") || transactions[0];
-  const txn = transactions.find((t) => t.id === showcaseId) || fallback;
-  const result = results[txn.id];
-  const running = result?.status === "processing";
-
-  return (
-    <div className="pra-live">
-      <div className="pra-live-inner">
-        <div className="pra-live-hero">
-          <h1>Watch the agents work</h1>
-          <p>
-            This is the AI. Investigator gathers evidence, Resolver proposes a Razorpay action,
-            Risk Reviewer stress-tests it — then a human decides. Hit play and follow the handoffs.
-          </p>
-        </div>
-
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-          {transactions.slice(0, 5).map((t) => (
-            <button
-              key={t.id}
-              className="pra-btn pra-btn-ghost"
-              style={{
-                fontSize: 12,
-                padding: "7px 10px",
-                borderColor: t.id === txn.id ? "#3B5BDB" : undefined,
-                background: t.id === txn.id ? "#F0F4FF" : undefined,
-              }}
-              onClick={() => onPick(t.id)}
-              disabled={running}
-            >
-              {t.gatewayCode}
-            </button>
-          ))}
-        </div>
-
-        <AgentLiveWorkflow
-          txn={txn}
-          result={result}
-          onRun={!running ? () => onRun(txn) : undefined}
-          onApprove={result && (result.status === "resolved" || result.status === "escalated") && !result.humanDecision ? () => onApprove(txn.id) : undefined}
-          onOverride={result && (result.status === "resolved" || result.status === "escalated") && !result.humanDecision ? () => onOverride(txn.id) : undefined}
-        />
-      </div>
-    </div>
-  );
-}
-
 function Dashboard({ metrics, onOpenQueue, onOpenTxn }) {
   const maxClass = Math.max(1, ...metrics.classifications.map(([, n]) => n));
   const maxAction = Math.max(1, ...metrics.actions.map(([, n]) => n));
@@ -2832,17 +2783,7 @@ function IconAgents() {
   );
 }
 
-function IconLive() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="8" cy="8" r="5.5" />
-      <path d="M6.5 5.5 11 8l-4.5 2.5v-5z" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
 const NAV_ITEMS = [
-  { id: "liverun", label: "Live run", section: "Overview", Icon: IconLive },
   { id: "dashboard", label: "Dashboard", section: "Overview", Icon: IconDash },
   { id: "workspace", label: "Queue", section: "Operations", Icon: IconQueue },
   { id: "escalations", label: "Escalations", section: "Operations", Icon: IconEscalate },
@@ -2850,15 +2791,14 @@ const NAV_ITEMS = [
 ];
 
 const PAGE_META = {
-  liverun: { title: "Live run", sub: "Watch Investigator → Resolver → Risk Reviewer reason in real time" },
   dashboard: { title: "Dashboard", sub: "₹ at risk, agent funnel, and Razorpay exception health" },
-  workspace: { title: "Resolution queue", sub: "payment_id exceptions across merchants" },
+  workspace: { title: "Resolution queue", sub: "Select a payment and watch agents investigate live" },
   escalations: { title: "Escalations", sub: "Cases needing human / Risk review" },
   agents: { title: "Agents", sub: "Investigator, Resolver, and Risk Reviewer roles" },
 };
 
 export default function PaymentResolutionAgent() {
-  const [view, setView] = useState("liverun");
+  const [view, setView] = useState("workspace");
   const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
   const [results, setResults] = useState(SEED_RESULTS);
   const [selectedId, setSelectedId] = useState(INITIAL_TRANSACTIONS[0].id);
@@ -3103,17 +3043,6 @@ export default function PaymentResolutionAgent() {
           </div>
         </header>
 
-        {view === "liverun" && (
-          <LiveRunView
-            transactions={transactions}
-            results={results}
-            onRun={(txn) => { setSelectedId(txn.id); runAgent(txn); }}
-            onApprove={(id) => approve(id)}
-            onOverride={(id) => beginOverride(id)}
-            onPick={(id) => setSelectedId(id)}
-          />
-        )}
-
         {view === "dashboard" && (
           <Dashboard
             metrics={metrics}
@@ -3183,44 +3112,49 @@ export default function PaymentResolutionAgent() {
                       <span className="pra-chip">{selected.gatewayCode}</span>
                       <span className="pra-chip">{selected.method}</span>
                       <span className="pra-muted" style={{ fontSize: 12 }}>{selected.merchantName}</span>
-                      <span className="pra-muted" style={{ fontSize: 12 }}>{selected.ts}</span>
                     </div>
                   </div>
                   <div className="pra-detail-amount">{selected.amount}</div>
                 </div>
                 <p className="pra-detail-note">{selected.note}</p>
-
-                <div className="pra-id-grid">
-                  <div className="pra-id-item"><div className="pra-id-k">payment_id</div><div className="pra-mono pra-id-v">{selected.id}</div></div>
-                  <div className="pra-id-item"><div className="pra-id-k">order_id</div><div className="pra-mono pra-id-v">{selected.orderId}</div></div>
-                  <div className="pra-id-item"><div className="pra-id-k">merchant_id</div><div className="pra-mono pra-id-v">{selected.merchantId}</div></div>
-                  <div className="pra-id-item"><div className="pra-id-k">settlement_id</div><div className="pra-mono pra-id-v">{selected.settlementId}</div></div>
-                  <div className="pra-id-item"><div className="pra-id-k">refund_id</div><div className="pra-mono pra-id-v">{selected.refundId}</div></div>
-                  <div className="pra-id-item"><div className="pra-id-k">bank RRN</div><div className="pra-mono pra-id-v">{selected.rrn}</div></div>
-                </div>
-
-                <div className="pra-detail-actions">
-                  {!selectedResult && (
-                    <button className="pra-btn pra-btn-primary" onClick={() => runAgent(selected)}>
-                      Watch agents work
-                    </button>
-                  )}
-                  {selectedResult?.status === "error" && (
-                    <button className="pra-btn pra-btn-ghost" onClick={() => runAgent(selected)}>
-                      Retry pipeline
-                    </button>
-                  )}
-                  {selectedResult?.status === "processing" && (
-                    <div className="pra-waiting" style={{ padding: "8px 12px", border: "none", background: "transparent" }}>
-                      <div className="pra-spinner" />
-                      Pipeline running…
-                    </div>
-                  )}
-                </div>
+                {selectedResult?.status === "processing" && (
+                  <div className="pra-waiting" style={{ marginTop: 12, padding: "10px 12px" }}>
+                    <div className="pra-spinner" />
+                    Agents are working — follow the live workflow below
+                  </div>
+                )}
               </div>
 
               <div className="pra-detail-body">
-                <div className="pra-detail-inner">
+                <div className="pra-detail-inner" style={{ maxWidth: 720 }}>
+                  <div className="pra-section-title" style={{ marginTop: 0 }}>Live agent workflow</div>
+                  <p className="pra-muted" style={{ fontSize: 13, marginBottom: 14, lineHeight: 1.45 }}>
+                    Watch Investigator gather evidence, Resolver propose an action, Risk Reviewer approve or reject, then take the human decision.
+                  </p>
+
+                  {selectedResult?.status === "error" && (
+                    <div style={{ color: "#C4392B", fontSize: 13, marginBottom: 12 }}>{selectedResult.error}</div>
+                  )}
+
+                  <AgentLiveWorkflow
+                    txn={selected}
+                    result={selectedResult}
+                    compact
+                    onRun={selectedResult?.status === "processing" ? undefined : () => runAgent(selected)}
+                    onApprove={selectedResult && !selectedResult.humanDecision && (selectedResult.status === "resolved" || selectedResult.status === "escalated") ? () => approve() : undefined}
+                    onOverride={selectedResult && !selectedResult.humanDecision && (selectedResult.status === "resolved" || selectedResult.status === "escalated") ? () => beginOverride() : undefined}
+                  />
+
+                  <div className="pra-section-title">Razorpay IDs</div>
+                  <div className="pra-id-grid" style={{ marginTop: 0 }}>
+                    <div className="pra-id-item"><div className="pra-id-k">payment_id</div><div className="pra-mono pra-id-v">{selected.id}</div></div>
+                    <div className="pra-id-item"><div className="pra-id-k">order_id</div><div className="pra-mono pra-id-v">{selected.orderId}</div></div>
+                    <div className="pra-id-item"><div className="pra-id-k">merchant_id</div><div className="pra-mono pra-id-v">{selected.merchantId}</div></div>
+                    <div className="pra-id-item"><div className="pra-id-k">settlement_id</div><div className="pra-mono pra-id-v">{selected.settlementId}</div></div>
+                    <div className="pra-id-item"><div className="pra-id-k">refund_id</div><div className="pra-mono pra-id-v">{selected.refundId}</div></div>
+                    <div className="pra-id-item"><div className="pra-id-k">bank RRN</div><div className="pra-mono pra-id-v">{selected.rrn}</div></div>
+                  </div>
+
                   <div className="pra-section-title">Evidence timeline</div>
                   <div className="pra-card" style={{ padding: "16px 16px 4px" }}>
                     <div className="pra-timeline">
@@ -3256,45 +3190,22 @@ export default function PaymentResolutionAgent() {
                     })}
                   </div>
 
-                  {selectedResult?.status === "error" && (
-                    <div style={{ color: "#C4392B", fontSize: 13, margin: "16px 0 12px" }}>{selectedResult.error}</div>
-                  )}
-
-                  {!selectedResult && (
-                    <div className="pra-waiting" style={{ marginTop: 18 }}>
-                      Evidence loaded. Click <strong style={{ color: "#1A1D24" }}>Run pipeline</strong> to start agents.
-                    </div>
-                  )}
-
-                  {selectedResult && selectedResult.status !== "error" && (
+                  {selectedResult && (selectedResult.audit?.length > 0 || selectedResult.investigation) && (
                     <>
-                      <div className="pra-section-title">Live agent workflow</div>
-                      <AgentLiveWorkflow
-                        txn={selected}
-                        result={selectedResult}
-                        compact
-                        onApprove={!selectedResult.humanDecision && (selectedResult.status === "resolved" || selectedResult.status === "escalated") ? () => approve() : undefined}
-                        onOverride={!selectedResult.humanDecision && (selectedResult.status === "resolved" || selectedResult.status === "escalated") ? () => beginOverride() : undefined}
-                      />
-
-                      {(selectedResult.audit?.length > 0 || selectedResult.investigation) && (
-                        <>
-                          <div className="pra-section-title">Audit trail</div>
-                          <div className="pra-card">
-                            <div className="pra-audit">
-                              {(selectedResult.audit || buildAuditFromResult(selectedResult)).map((entry, i) => (
-                                <div className="pra-audit-row" key={i}>
-                                  <div className="pra-mono pra-audit-ts">{entry.ts}</div>
-                                  <div>
-                                    <div className="pra-audit-who">{entry.who}</div>
-                                    <div className="pra-audit-what">{entry.what}</div>
-                                  </div>
-                                </div>
-                              ))}
+                      <div className="pra-section-title">Audit trail</div>
+                      <div className="pra-card">
+                        <div className="pra-audit">
+                          {(selectedResult.audit || buildAuditFromResult(selectedResult)).map((entry, i) => (
+                            <div className="pra-audit-row" key={i}>
+                              <div className="pra-mono pra-audit-ts">{entry.ts}</div>
+                              <div>
+                                <div className="pra-audit-who">{entry.who}</div>
+                                <div className="pra-audit-what">{entry.what}</div>
+                              </div>
                             </div>
-                          </div>
-                        </>
-                      )}
+                          ))}
+                        </div>
+                      </div>
                     </>
                   )}
                 </div>
